@@ -1,9 +1,8 @@
-
 <html>
 <head>
     <meta charset="utf-8"/>
 
-   <title>Symbol Editor</title>
+    <title>Symbol Editor</title>
     <meta name="keywords" content=""/>
     <meta name="description" content=""/>
     <link href="style.css" rel="stylesheet">
@@ -16,6 +15,12 @@
     <header class="header">
 
         <a href="SymbolEditor.htm">Symbol Editor</a>
+
+        Edit Mode: <select onchange="UIsetEditMode(this.options[this.selectedIndex].text);">
+        <option>Symbol</option>
+        <option>Pads</option>
+    </select>
+
     </header><!-- .header-->
 
     <div class="middle">
@@ -24,7 +29,7 @@
             <main class="content">
 
 
-                <canvas id="myCanvas" width="800" height="800" style="background-color: red;width:800px;height:800px">
+                <canvas id="myCanvas" width="800" height="800" style="width:800px;height:800px">
                     Your browser does not support the HTML5 canvas tag.
                 </canvas>
             </main><!-- .content -->
@@ -32,14 +37,18 @@
 
         <aside class="left-sidebar">
             <input type="button" value="Load Symbol To Editor" onclick="UIsymbolButtonClick('load');"><br>
-            <select id="PinListing" size="20" style="width: 90%;">
+            <input type="button" value="+" onclick="UIsymbolButtonClick('+');"><br>
+            <input type="button" value="-" onclick="UIsymbolButtonClick('-');"><br>
+            <input type="button" value="Rename" onclick="UIsymbolButtonClick('Rename');"><br>
+            <select id="PinListing" size="20" style="width: 90%;"
+                    onchange="UIpinSelectClick(this.options[this.selectedIndex].text);">
 
             </select>
 
             <br>
             <textarea id="TextPinListing" rows="20" style="width:90%">
-pinid|5|10|
-pinid2|20|30|
+pinid|5|10|20|70|
+pinid2|20|30|80|60|
 </textarea>
         </aside><!-- .left-sidebar -->
 
