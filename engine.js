@@ -72,6 +72,14 @@ function CircuitLayout() {
 
     };
 
+    this.UIupdateFromProperties = function ()
+    {
+        this.SymbolID = document.getElementById("SymbolID").value ;
+        this.SchematicX = document.getElementById("SchematicX").value;
+        this.SchematicY = document.getElementById("SchematicY").value;
+        this.SchematicRotation = document.getElementById("SchematicRotation").value;
+    };
+
     this.delete();
 }
 
@@ -136,6 +144,11 @@ canvas.addEventListener('click', function (evt) {
 }, false);
 
 
+
+
+
+
+
 function UIshowSymbolLayoutInfo(mousePos) {
 
 
@@ -167,6 +180,11 @@ function UIsymbolLayoutButtonClick(ActionToBeTaken) {
 
     if (ActionToBeTaken == "move") {
         CurrentToolStatus = "moveSymbol";
+    }
+
+    if (ActionToBeTaken == "apply") {
+        Layout[UIselectedSymbolID].UIupdateFromProperties();
+        renderLayout();
     }
 }
 
