@@ -20,17 +20,29 @@
         <div class="container">
             <main class="content">
 
-                <canvas id="myCanvas" width="500" height="500" style="background-color: red;width:500px;height:500px">
-                    Your browser does not support the HTML5 canvas tag.</canvas>
+
+                <canvas id="myCanvas" width="800" height="800" style="background-color: red;width:800px;height:800px">
+                    Your browser does not support the HTML5 canvas tag.
+                </canvas>
             </main><!-- .content -->
         </div><!-- .container-->
 
         <aside class="left-sidebar">
-            <img src="./symbols/1.png" >
+            <img src="./symbols/1.png">
         </aside><!-- .left-sidebar -->
 
         <aside class="right-sidebar">
-            test right
+            <div>
+                Layout ID:<input type="text" id="LayoutID" value=""><br>
+                Symbol ID:<input type="text" id="SymbolID" value=""><br>
+                X:<input type="text" id="SchematicX" value=""><br>
+                Y:<input type="text" id="SchematicY" value=""><br>
+                Rotation:<input type="text" id="SchematicRotation" value=""><br>
+
+                <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
+                <input type="button" value="Move" onclick="UIsymbolLayoutButtonClick('move');">
+
+            </div>
         </aside><!-- .right-sidebar -->
 
     </div><!-- .middle-->
