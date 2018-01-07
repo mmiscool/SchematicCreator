@@ -1,30 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Symbol Editor</title>
+    <meta charset="utf-8"/>
+
+   <title>Symbol Editor</title>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <link href="style.css" rel="stylesheet">
+
+
 </head>
-<body>
-<input type="button" value="Load Symbol To Editor" onclick="UIsymbolButtonClick('load');"><br>
-<select id="PinListing" size="20" style="width: 300px;">
 
-</select>
+<div class="wrapper">
 
-<br>
-<textarea id= "TextPinListing" rows="4" cols="50">
+    <header class="header">
+
+        <a href="SymbolEditor.htm">Symbol Editor</a>
+    </header><!-- .header-->
+
+    <div class="middle">
+
+        <div class="container">
+            <main class="content">
+
+
+                <canvas id="myCanvas" width="800" height="800" style="background-color: red;width:800px;height:800px">
+                    Your browser does not support the HTML5 canvas tag.
+                </canvas>
+            </main><!-- .content -->
+        </div><!-- .container-->
+
+        <aside class="left-sidebar">
+            <input type="button" value="Load Symbol To Editor" onclick="UIsymbolButtonClick('load');"><br>
+            <select id="PinListing" size="20" style="width: 90%;">
+
+            </select>
+
+            <br>
+            <textarea id="TextPinListing" rows="20" style="width:90%">
 pinid|5|10|
 pinid2|20|30|
 </textarea>
+        </aside><!-- .left-sidebar -->
+
+        <aside class="right-sidebar">
+            <div>
+                Layout ID:<input type="text" id="LayoutID" value=""><br>
+                Symbol ID:<input type="text" id="SymbolID" value=""><br>
+                X:<input type="text" id="SchematicX" value=""><br>
+                Y:<input type="text" id="SchematicY" value=""><br>
+                Rotation:<input type="text" id="SchematicRotation" value=""><br>
+
+                <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
+                <input type="button" value="Move" onclick="UIsymbolLayoutButtonClick('move');">
+                <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
+
+            </div>
+        </aside><!-- .right-sidebar -->
+
+    </div><!-- .middle-->
+
+</div><!-- .wrapper -->
 
 
-</body>
-
-
+<footer class="footer">
+    Schematic Creator (C) Michael Molinari 2018
+</footer><!-- .footer -->
 
 
 <script src="SymbolEditor.js"></script>
 </html>
 
-<script>
-
-</script>
