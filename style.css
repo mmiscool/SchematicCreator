@@ -74,7 +74,7 @@ body {
 /* Middle
 -----------------------------------------------------------------------------*/
 .middle {
-    height: 100%;
+
 	width: 100%;
 	padding: 0 0 100px;
 	position: relative;
@@ -87,7 +87,7 @@ body {
 .container {
 	width: 100%;
 	float: left;
-
+	overflow: hidden;
 }
 .content {
 	padding: 0 270px 0 270px;
@@ -101,7 +101,7 @@ body {
 	width: 250px;
 	margin-left: -100%;
 	position: relative;
-	background: #B5E3FF;
+
 }
 
 
