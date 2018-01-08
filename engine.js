@@ -167,9 +167,13 @@ function getMousePos(canvas, evt) {
 
 var canvas = document.getElementById('myCanvas');
 var context = canvas.getContext('2d');
-
-canvas.addEventListener('click', function (evt) {
+canvas.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+});
+canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
+
+    if(evt.button === 2)CurrentToolStatus = "moveSymbol";
 
     if (CurrentToolStatus == "symbolPic") {
         UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
