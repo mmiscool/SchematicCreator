@@ -31,9 +31,9 @@
         </div><!-- .container-->
 
         <aside class="left-sidebar">
-
+            <input type="button" value="Add Symbol" onclick="UIaddSymbolButtonClick();">
             <select id="SymbolListingForSelection" size="20" style="width: 90%;"
-                    onchange="UISymbolAdderSelectClick(this.options[this.selectedIndex].text);">
+                    onchange="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
 
             </select>
 
@@ -45,7 +45,10 @@
                 Symbol ID:<input type="text" id="SymbolID" value=""><br>
                 X:<input type="text" id="SchematicX" value=""><br>
                 Y:<input type="text" id="SchematicY" value=""><br>
-                Rotation:<input type="text" id="SchematicRotation" value=""><br>
+                Rotation:<input type="text" size="3" id="SchematicRotation" value="">
+                <input type="button" value="Left" onclick="UIsymbolLayoutButtonClick('rotate left');">
+                <input type="button" value="Right" onclick="UIsymbolLayoutButtonClick('rotate right');">
+                <br>
 
                 <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
                 <input type="button" value="Move" onclick="UIsymbolLayoutButtonClick('move');">

@@ -119,12 +119,8 @@ function UIloadStoredLayout() {
 
     for (x = 1; x <= MaxSymbols; x++) {
         Symbols[x] = new CircuitSymbols();
-
         Symbols[x].extend(BrowserStorage("Symbol", x, "Layout"));
-
-        alert(Symbols[x].Name);
-
-        UIaddItemToSelect("SymbolListingForSelection",Symbols[x].Name, x);
+        UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
     }
 
     for (x = 1; x <= MaxConnections; x++) {
@@ -133,7 +129,6 @@ function UIloadStoredLayout() {
 
     for (x = 1; x <= MaxLayout; x++) {
         Layout[x] = new CircuitLayout();
-
         Layout[x].extend(BrowserStorage("Schematic", x, "Layout"));
     }
 }
@@ -187,14 +182,49 @@ canvas.addEventListener('click', function (evt) {
         UIselectedSymbolID = document.getElementById("LayoutID").value;
         Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
-        CurrentToolStatus = "symbolPic"
+        CurrentToolStatus = "symbolPic";
+    }
+
+
+    if (CurrentToolStatus == "addSymbol") {
+        UIselectedSymbolID = "";
+
+        for (x = 1; x <= MaxLayout; x++) {
+            console.log(x + " " + Layout[x].SymbolID);
+            if (Layout[x].SymbolID === 0) {
+                alert("Adding symbol");
+                UIselectedSymbolID = x;
+                Layout[x].SymbolID= UIsymbolToAdd;
+
+                Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
+                UIshowSymbolLayoutInfo(UIselectedSymbolID);
+                CurrentToolStatus = "symbolPic";
+
+                break;
+            }
+
+        }
+
+
+        UIshowSymbolLayoutInfo(UIselectedSymbolID);
+        CurrentToolStatus = "symbolPic";
     }
 
     renderLayout();
 }, false);
 
 
-function UIshowSymbolLayoutInfo(mousePos) {
+function UIaddSymbolButtonClick() {
+    if (UIsymbolToAdd != "") {
+        CurrentToolStatus = "addSymbol";
+    }
+    else {
+        Alert("You must select a symbol");
+    }
+}
+
+
+function UIshowSymbolLayoutInfo() {
 
 
     if (UIselectedSymbolID) {
@@ -230,6 +260,21 @@ function UIsymbolLayoutButtonClick(ActionToBeTaken) {
     if (ActionToBeTaken == "apply") {
         Layout[UIselectedSymbolID].UIupdateFromProperties();
         renderLayout();
+    }
+
+
+    if (ActionToBeTaken == "rotate left") {
+        Layout[UIselectedSymbolID].SchematicRotation -= 90;
+        if (Layout[UIselectedSymbolID].SchematicRotation === -90) Layout[UIselectedSymbolID].SchematicRotation = 270 ;
+        renderLayout();
+        UIshowSymbolLayoutInfo();
+    }
+
+    if (ActionToBeTaken == "rotate right") {
+        Layout[UIselectedSymbolID].SchematicRotation += 90;
+        if (Layout[UIselectedSymbolID].SchematicRotation === 360) Layout[UIselectedSymbolID].SchematicRotation = 0 ;
+        renderLayout();
+        UIshowSymbolLayoutInfo();
     }
 }
 
@@ -295,15 +340,15 @@ function BrowserStorage(type, id, field) {
     return "";
 }
 
+var UIsymbolToAdd = "";
 
-function UISymbolAdderSelectClick(thing)
-{
-    alert(thing);
+function UISymbolAdderSelectClick(thing) {
+    UIsymbolToAdd = thing;
 }
 
-function UIaddItemToSelect(id, optionToAdd,value) {
+function UIaddItemToSelect(id, optionToAdd, value) {
     var option = document.createElement("option");
-    if (optionToAdd === "")return;
+    if (optionToAdd === "") return;
     option.text = optionToAdd;
     option.value = value
     document.getElementById(id).add(option);
