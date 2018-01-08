@@ -1,7 +1,9 @@
 var MaxSymbols = 5;
-var MaxLayout = 50;
+var MaxLayout = 10;
 var MaxConnections = 50;
 var CurrentToolStatus = "symbolPic";
+
+var UIselectedSymbolID;
 
 var SchematicID = new URL(window.location.href).searchParams.get("id");
 
@@ -167,13 +169,11 @@ function getMousePos(canvas, evt) {
 
 var canvas = document.getElementById('myCanvas');
 var context = canvas.getContext('2d');
-canvas.addEventListener("contextmenu", (event) => {
-    event.preventDefault();
-});
+canvas.addEventListener("contextmenu", (event) => {    event.preventDefault();});
 canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
 
-    if(evt.button === 2)CurrentToolStatus = "moveSymbol";
+    if (evt.button === 2 && UIselectedSymbolID) CurrentToolStatus = "moveSymbol";
 
     if (CurrentToolStatus == "symbolPic") {
         UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
@@ -198,7 +198,7 @@ canvas.addEventListener('mouseup', function (evt) {
             if (Layout[x].SymbolID === 0) {
                 alert("Adding symbol");
                 UIselectedSymbolID = x;
-                Layout[x].SymbolID= UIsymbolToAdd;
+                Layout[x].SymbolID = UIsymbolToAdd;
 
                 Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
                 UIshowSymbolLayoutInfo(UIselectedSymbolID);
@@ -269,14 +269,14 @@ function UIsymbolLayoutButtonClick(ActionToBeTaken) {
 
     if (ActionToBeTaken == "rotate left") {
         Layout[UIselectedSymbolID].SchematicRotation -= 90;
-        if (Layout[UIselectedSymbolID].SchematicRotation === -90) Layout[UIselectedSymbolID].SchematicRotation = 270 ;
+        if (Layout[UIselectedSymbolID].SchematicRotation === -90) Layout[UIselectedSymbolID].SchematicRotation = 270;
         renderLayout();
         UIshowSymbolLayoutInfo();
     }
 
     if (ActionToBeTaken == "rotate right") {
         Layout[UIselectedSymbolID].SchematicRotation += 90;
-        if (Layout[UIselectedSymbolID].SchematicRotation === 360) Layout[UIselectedSymbolID].SchematicRotation = 0 ;
+        if (Layout[UIselectedSymbolID].SchematicRotation === 360) Layout[UIselectedSymbolID].SchematicRotation = 0;
         renderLayout();
         UIshowSymbolLayoutInfo();
     }
@@ -298,6 +298,14 @@ function RenderLayoutItem(id) {
     var img = new Image();
     img.src = './symbols/' + Layout[id].SymbolID + '-Symbol.png';
     drawRotatedImage(img, Layout[id].SchematicX, Layout[id].SchematicY, Layout[id].SchematicRotation);
+}
+
+function UIdrawPin(PinX, PinY, Collor) {
+    context.beginPath();
+    context.arc(PinX, PinY, 3, 0, 2 * Math.PI, false);
+    context.fillStyle = Collor;
+    context.fill();
+    context.closePath();
 }
 
 
@@ -326,8 +334,43 @@ function renderLayout() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (x = 1; x <= MaxLayout; x++) {
         RenderLayoutItem(x);
+        renderLayoutItemPoints(x);
+    }
+
+
+    //renderLayoutItemPoints(UIselectedSymbolID);
+}
+
+function renderLayoutItemPoints(id) {
+    if (!id) return;
+    if (Layout[id].SymbolID <= 0) return;
+    UIeditMode = "Symbol";
+
+    pins = Symbols[Layout[id].SymbolID].Points.split('\n');
+    for (i = 0; i < pins.length; i++) {
+        if (UIeditMode === "Symbol") {
+            PinX = Number(pins[i].split('|')[1]);
+            PinY = Number(pins[i].split('|')[2]);
+        }
+
+        if (UIeditMode === "Pads") {
+            PinX = Number(pins[i].split('|')[3]);
+            PinY = Number(pins[i].split('|')[4]);
+        }
+
+        PinCollor = "red";
+
+
+
+        PinX += Layout[id].SchematicX - Symbols[Layout[id].SymbolID].width/2;
+        PinY += Layout[id].SchematicY - Symbols[Layout[id].SymbolID].height/2;
+
+        UIdrawPin(PinX, PinY, PinCollor);
+
+
     }
 }
+
 
 renderLayout();
 
@@ -348,7 +391,7 @@ var UIsymbolToAdd = "";
 
 function UISymbolAdderSelectClick(thing) {
     UIsymbolToAdd = thing;
-    document.getElementById('SymbolPreviewImage').src="./Symbols/" + UIsymbolToAdd + '-Symbol.png';
+    document.getElementById('SymbolPreviewImage').src = "./Symbols/" + UIsymbolToAdd + '-Symbol.png';
 }
 
 function UIaddItemToSelect(id, optionToAdd, value) {
