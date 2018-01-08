@@ -14,7 +14,8 @@
 
     <header class="header">
 
-        <a href="SymbolEditor.htm">Symbol Editor</a>
+        <a href="SymbolEditor.htm">Symbol Editor</a><br>
+        <input type="button" value="Save" onclick="UIsaveStoredLayout();">
     </header><!-- .header-->
 
     <div class="middle">
@@ -30,7 +31,12 @@
         </div><!-- .container-->
 
         <aside class="left-sidebar">
-            <img src="./symbols/1.png">
+
+            <select id="SymbolListingForSelection" size="20" style="width: 90%;"
+                    onchange="UISymbolAdderSelectClick(this.options[this.selectedIndex].text);">
+
+            </select>
+
         </aside><!-- .left-sidebar -->
 
         <aside class="right-sidebar">

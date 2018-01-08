@@ -1,16 +1,28 @@
-var MaxSymbols = 100;
+var MaxSymbols = 5;
 var MaxLayout = 50;
 var MaxConnections = 50;
 var CurrentToolStatus = "symbolPic";
 
+var SchematicID = new URL(window.location.href).searchParams.get("id");
+
 function CircuitSymbols() {
     this.delete = function () {
         this.Name = "";
-        this.symbolPoints = "";
-        this.padPoints = "";
+        this.Points = "";
         this.width = 0;
         this.height = 0;
         return "deleted";
+    };
+
+    this.extend = function (jsonString) {
+
+        try {
+            var obj = JSON.parse(jsonString)
+            for (var key in obj) {
+                this[key] = obj[key]
+            }
+        } catch (e) {
+        }
     };
 
     this.delete();
@@ -72,12 +84,23 @@ function CircuitLayout() {
 
     };
 
-    this.UIupdateFromProperties = function ()
-    {
-        this.SymbolID = document.getElementById("SymbolID").value ;
+    this.UIupdateFromProperties = function () {
+        this.SymbolID = document.getElementById("SymbolID").value;
         this.SchematicX = document.getElementById("SchematicX").value;
         this.SchematicY = document.getElementById("SchematicY").value;
         this.SchematicRotation = document.getElementById("SchematicRotation").value;
+    };
+
+
+    this.extend = function (jsonString) {
+
+        try {
+            var obj = JSON.parse(jsonString)
+            for (var key in obj) {
+                this[key] = obj[key]
+            }
+        } catch (e) {
+        }
     };
 
     this.delete();
@@ -91,18 +114,45 @@ var Layout = [];
 
 
 //Populate arraies with empty data
-for (x = 1; x <= MaxConnections; x++) {
-    Connections[x] = new CircuitConnections();
+//or load data from localstorage
+function UIloadStoredLayout() {
+
+    for (x = 1; x <= MaxSymbols; x++) {
+        Symbols[x] = new CircuitSymbols();
+
+        Symbols[x].extend(BrowserStorage("Symbol", x, "Layout"));
+
+        alert(Symbols[x].Name);
+
+        UIaddItemToSelect("SymbolListingForSelection",Symbols[x].Name, x);
+    }
+
+    for (x = 1; x <= MaxConnections; x++) {
+        Connections[x] = new CircuitConnections();
+    }
+
+    for (x = 1; x <= MaxLayout; x++) {
+        Layout[x] = new CircuitLayout();
+
+        Layout[x].extend(BrowserStorage("Schematic", x, "Layout"));
+    }
 }
 
-for (x = 1; x <= MaxSymbols; x++) {
-    Symbols[x] = new CircuitSymbols();
+
+function UIsaveStoredLayout() {
+
+    for (x = 1; x <= MaxConnections; x++) {
+        Connections[x] = new CircuitConnections();
+    }
+
+    for (x = 1; x <= MaxLayout; x++) {
+        BrowserStorageStore("Schematic", x, "Layout", JSON.stringify(Layout[x]));
+
+    }
 }
 
-for (x = 1; x <= MaxLayout; x++) {
-    Layout[x] = new CircuitLayout();
-}
 
+UIloadStoredLayout();
 
 function writeMessage(canvas, message) {
     var context = canvas.getContext('2d');
@@ -142,11 +192,6 @@ canvas.addEventListener('click', function (evt) {
 
     renderLayout();
 }, false);
-
-
-
-
-
 
 
 function UIshowSymbolLayoutInfo(mousePos) {
@@ -199,28 +244,10 @@ function CheckLayoutSymbolClick(x, y) {
 }
 
 
-Symbols[1].Name = "test";
-Symbols[1].width = 74;
-Symbols[1].height = 100;
-
-
-Layout[1].SymbolID = 1;
-
-
-Layout[5].SymbolID = 1;
-Layout[5].SchematicX = 400;
-Layout[5].SchematicX = 400;
-
-Layout[6].SymbolID = 1;
-Layout[6].SchematicX = 50;
-Layout[6].SchematicRotation = 90;
-Layout[6].SchematicY = 350;
-
-
 function RenderLayoutItem(id) {
     if (Layout[id].SymbolID <= 0) return;
     var img = new Image();
-    img.src = './symbols/' + Layout[id].SymbolID + '.png';
+    img.src = './symbols/' + Layout[id].SymbolID + '-Symbol.png';
     drawRotatedImage(img, Layout[id].SchematicX, Layout[id].SchematicY, Layout[id].SchematicRotation);
 }
 
@@ -254,3 +281,30 @@ function renderLayout() {
 }
 
 renderLayout();
+
+
+function BrowserStorageStore(type, id, field, contents) {
+    localStorage.setItem(type + "-" + id + "-" + field, contents);
+}
+
+function BrowserStorage(type, id, field) {
+    if (localStorage.getItem(type + "-" + id + "-" + field)) {
+
+        return localStorage.getItem(type + "-" + id + "-" + field);
+    }
+    return "";
+}
+
+
+function UISymbolAdderSelectClick(thing)
+{
+    alert(thing);
+}
+
+function UIaddItemToSelect(id, optionToAdd,value) {
+    var option = document.createElement("option");
+    if (optionToAdd === "")return;
+    option.text = optionToAdd;
+    option.value = value
+    document.getElementById(id).add(option);
+}

@@ -2,10 +2,65 @@ var UIeditMode = "Symbol";
 var UICurrentlySelectedPin = "";
 var SymbolID = new URL(window.location.href).searchParams.get("id");
 
+
+function CircuitSymbols() {
+    this.delete = function () {
+        this.Name = "";
+        this.Points = "";
+        this.width = 0;
+        this.height = 0;
+        return "deleted";
+    };
+
+    this.extend = function (jsonString) {
+
+        try {
+            var obj = JSON.parse(jsonString)
+            for (var key in obj) {
+                this[key] = obj[key]
+            }
+        } catch (e) {
+        }
+    };
+
+    this.delete();
+}
+
+var SymbolObject = new CircuitSymbols();
+
+SymbolObject.extend(BrowserStorage("Symbol",SymbolID,"Layout"));
+
+document.getElementById("Name").value = SymbolObject.Name;
+
 function UIsymbolButtonClick(ActionToBeTaken) {
     if (!ActionToBeTaken) return;
 
     if (ActionToBeTaken === "load") UIloadItem();
+
+    if (ActionToBeTaken === "+") UInewPin();
+
+
+    if (ActionToBeTaken === "-") UIremovePin();
+
+
+}
+
+
+function UIremovePin() {
+    var x = document.getElementById("PinListing");
+    x.remove(x.selectedIndex);
+    UIDrawPins();
+    UIloadItem();
+
+}
+
+function UInewPin() {
+    NewPinID = prompt("Enter Pin ID", "pin id");
+    if (NewPinID != null) {
+        UIaddItemToSelect("PinListing", NewPinID + "|50|50|50|50|");
+    }
+    UIDrawPins();
+
 }
 
 
@@ -14,7 +69,7 @@ function UIloadItem() {
     document.getElementById("PinListing").innerHTML = "";
     context.clearRect(0, 0, canvas.width, canvas.height); //clear the canvas
 
-    var lines = document.getElementById('TextPinListing').value.split('\n');
+    var lines = SymbolObject.Points.split('\n');
     for (var i = 0; i < lines.length; i++) {
         if (lines[i] != "") UIaddItemToSelect("PinListing", lines[i]);
     }
@@ -24,8 +79,14 @@ function UIloadItem() {
     img.onload = function () {
         context.drawImage(img, 0, 0);
         UIDrawPins();
+
+        SymbolObject.width = img.width;
+        SymbolObject.height = img.height;
+
     }
     UIDrawPins();
+
+
 }
 
 function UIDrawPins() {
@@ -36,17 +97,17 @@ function UIDrawPins() {
     for (i = 0; i < pins.length; i++) {
         TotalPinListing += pins.options[i].text + '\n'
 
-        if (UIeditMode == "Symbol") {
+        if (UIeditMode === "Symbol") {
             PinX = pins.options[i].text.split('|')[1];
             PinY = pins.options[i].text.split('|')[2];
         }
 
-        if (UIeditMode == "Pads") {
+        if (UIeditMode === "Pads") {
             PinX = pins.options[i].text.split('|')[3];
             PinY = pins.options[i].text.split('|')[4];
         }
 
-        if (pins.options[i].text == UICurrentlySelectedPin) {
+        if (pins.options[i].text === UICurrentlySelectedPin) {
             PinCollor = "red"
         } else {
             PinCollor = "cyan";
@@ -57,7 +118,11 @@ function UIDrawPins() {
 
     }
 
-    document.getElementById('TextPinListing').value = TotalPinListing;
+    SymbolObject.Name = document.getElementById("Name").value;
+    SymbolObject.Points = TotalPinListing;
+
+    BrowserStorageStore("Symbol",SymbolID,"Layout",JSON.stringify(SymbolObject));
+
 }
 
 function UIdrawPin(PinX, PinY, Collor) {
@@ -141,3 +206,16 @@ canvas.addEventListener('click', function (evt) {
 
 
 UIloadItem();
+
+
+function BrowserStorageStore(type, id, field, contents) {
+    localStorage.setItem(type + "-" + id + "-" + field, contents);
+}
+
+function BrowserStorage(type, id, field) {
+    if (localStorage.getItem(type + "-" + id + "-" + field)) {
+
+        return localStorage.getItem(type + "-" + id + "-" + field);
+    }
+    return "";
+}

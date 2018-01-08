@@ -14,13 +14,15 @@
 
     <header class="header">
 
-        <a href="SymbolEditor.htm">Symbol Editor</a>
+        <a href="index.htm">Scematic Editor</a>
 
-        Edit Mode: <select onchange="UIsetEditMode(this.options[this.selectedIndex].text);">
-        <option>Symbol</option>
-        <option>Pads</option>
-    </select>
-
+        Edit Mode:
+        <select onchange="UIsetEditMode(this.options[this.selectedIndex].text);">
+            <option>Symbol</option>
+            <option>Pads</option>
+        </select>
+        <br>
+        Symbol Name<input type="text" id="Name" value="" onchange="UIloadItem()">
     </header><!-- .header-->
 
     <div class="middle">
@@ -46,25 +48,13 @@
             </select>
 
             <br>
-            <textarea id="TextPinListing" rows="20" style="width:90%">
-pinid|5|10|20|70|
-pinid2|20|30|80|60|
-</textarea>
+
+
+            </textarea>
         </aside><!-- .left-sidebar -->
 
         <aside class="right-sidebar">
-            <div>
-                Layout ID:<input type="text" id="LayoutID" value=""><br>
-                Symbol ID:<input type="text" id="SymbolID" value=""><br>
-                X:<input type="text" id="SchematicX" value=""><br>
-                Y:<input type="text" id="SchematicY" value=""><br>
-                Rotation:<input type="text" id="SchematicRotation" value=""><br>
 
-                <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
-                <input type="button" value="Move" onclick="UIsymbolLayoutButtonClick('move');">
-                <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
-
-            </div>
         </aside><!-- .right-sidebar -->
 
     </div><!-- .middle-->
