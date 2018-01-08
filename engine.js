@@ -344,6 +344,7 @@ var UIsymbolToAdd = "";
 
 function UISymbolAdderSelectClick(thing) {
     UIsymbolToAdd = thing;
+    document.getElementById('SymbolPreviewImage').src="./Symbols/" + UIsymbolToAdd + '-Symbol.png';
 }
 
 function UIaddItemToSelect(id, optionToAdd, value) {
