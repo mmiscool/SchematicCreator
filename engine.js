@@ -57,15 +57,33 @@ function CircuitConnections() {
         return "deleted";
     };
 
+    this.remove = function () {
+        //deletes the item and rerenders
+        this.delete();
+        renderLayout();
+    };
 
-    this.DrawMe = function () {
+
+    this.DrawMe = function (collor) {
         if (this.id2 === 0) return;
         console.log(this.pin1);
         bla = Layout[this.id1].GivePointForPinID(this.pin1);
         //console.log(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
 
-        UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
+        if (collor != undefined) {
+            UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2), collor)
+        }
+        else {
+            UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2))
+        }
+
+
         return "Drew the line";
+    };
+
+    this.Select = function () {
+        renderLayout();
+        this.DrawMe("red");
     };
 
     this.delete();
@@ -286,6 +304,7 @@ function UIsaveStoredLayout() {
 
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x] = new CircuitConnections();
+        BrowserStorageStore("Schematic", x, "Layout", JSON.stringify(Layout[x]));
     }
 
     for (x = 1; x <= MaxLayout; x++) {
@@ -513,10 +532,15 @@ function UIdrawPin(point) {
     context.closePath();
 }
 
-function UIdrawLine(point1, point2) {
+function UIdrawLine(point1, point2, collor) {
 
-
+    context.lineWidth = 10;
     context.beginPath();
+    if (collor != undefined) {
+        context.strokeStyle = '#ff0000';
+    } else {
+        context.strokeStyle = "black";
+    }
     context.moveTo(Number(point1.x), Number(point1.y));
     context.lineTo(Number(point2.x), Number(point2.y));
     context.stroke();
@@ -556,7 +580,7 @@ function renderLayout() {
         //console.log(Connections[x]);
         Connections[x].DrawMe();
     }
-
+    UIdisplayConnectionTable();
     //renderLayoutItemPoints(UIselectedSymbolID);
 }
 
@@ -592,25 +616,48 @@ function UIaddItemToSelect(id, optionToAdd, value) {
 }
 
 
-function UIdisplayConnectionTable()
-{
+function UIdisplayConnectionTable() {
 
     var table = document.getElementById("ConnectionTable");
+    table.innerHTML = "";
+    var row = table.insertRow(-1);
+    row.insertCell(0).innerHTML = "Actions";
+    row.insertCell(1).innerHTML = "id1";
+    row.insertCell(2).innerHTML = "pin1";
+    row.insertCell(3).innerHTML = "id2";
+    row.insertCell(4).innerHTML = "pin2";
+    row.insertCell(5).innerHTML = "Jogged";
+    row.insertCell(6).innerHTML = "jogPosition";
+
 
     for (x = 1; x <= MaxConnections; x++) {
 
-        if (Connections[x].id2)
-        {
+        if (Connections[x].id2) {
 
             var row = table.insertRow(-1);
 
+            var bla = document.createElement("div");
 
-            row.insertCell(0).innerHTML = Connections[x].id1 ;
-            row.insertCell(1).innerHTML = Connections[x].pin1 ;
-            row.insertCell(2).innerHTML = Connections[x].id2 ;
-            row.insertCell(3).innerHTML = Connections[x].pin2 ;
-            row.insertCell(4).innerHTML = Connections[x].jogged ;
-            row.insertCell(5).innerHTML = Connections[x].jogPosition ;
+            var button = document.createElement("button");
+            button.innerHTML = "-";
+            button.id = x;
+            button.setAttribute("onClick", "Connections[" + x + "].remove();");
+            bla.appendChild(button)
+
+            var button = document.createElement("button");
+            button.innerHTML = "Select";
+            button.id = x;
+            button.setAttribute("onClick", "Connections[" + x + "].Select();");
+            bla.appendChild(button);
+            row.insertCell(0).appendChild(bla);
+
+
+            row.insertCell(1).innerHTML = Connections[x].id1;
+            row.insertCell(2).innerHTML = Connections[x].pin1;
+            row.insertCell(3).innerHTML = Connections[x].id2;
+            row.insertCell(4).innerHTML = Connections[x].pin2;
+            row.insertCell(5).innerHTML = Connections[x].jogged;
+            row.insertCell(6).innerHTML = Connections[x].jogPosition;
         }
 
     }
