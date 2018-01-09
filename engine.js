@@ -1,6 +1,6 @@
 var MaxSymbols = 5;
 var MaxLayout = 10;
-var MaxConnections = 50;
+var MaxConnections = 5;
 var CurrentToolStatus = "symbolPic";
 
 var UIselectedSymbolID;
@@ -34,11 +34,22 @@ function CircuitConnections() {
 
     this.delete = function () {
         this.id1 = 0;
+        this.pin1 = "";
         this.id2 = 0;
+        this.pin2 = "";
         this.jogged = "";
         this.jogPosition = 0;
         return "deleted";
     };
+
+
+    this.DrawMe = function () {
+        if (this.id2 === 0) return;
+
+        UIdrawLine(Layout[this.id1].SchematicX, Layout[this.id1].SchematicY, Layout[this.id2].SchematicX, Layout[this.id2].SchematicY);
+        return "Drew the line";
+    };
+
     this.delete();
 }
 
@@ -91,6 +102,13 @@ function CircuitLayout() {
         this.SchematicX = Number(document.getElementById("SchematicX").value);
         this.SchematicY = Number(document.getElementById("SchematicY").value);
         this.SchematicRotation = Number(document.getElementById("SchematicRotation").value);
+    };
+
+    this.RenderLayoutItem = function () {
+        if (this.SymbolID <= 0) return;
+        var img = new Image();
+        img.src = './symbols/' + this.SymbolID + '-Symbol.png';
+        drawRotatedImage(img, this.SchematicX, this.SchematicY, this.SchematicRotation);
     };
 
 
@@ -180,14 +198,14 @@ canvas.addEventListener('mouseup', function (evt) {
 
     if (evt.button === 2 && UIselectedSymbolID) CurrentToolStatus = "moveSymbol";
 
-    if (CurrentToolStatus == "symbolPic") {
+    if (CurrentToolStatus === "symbolPic") {
         UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
         //CheckLayoutSymbolClick(mousePos.x, mousePos.y);
     }
 
 
-    if (CurrentToolStatus == "moveSymbol") {
+    if (CurrentToolStatus === "moveSymbol") {
         UIselectedSymbolID = document.getElementById("LayoutID").value;
         Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
@@ -195,13 +213,13 @@ canvas.addEventListener('mouseup', function (evt) {
     }
 
 
-    if (CurrentToolStatus == "addSymbol") {
+    if (CurrentToolStatus === "addSymbol") {
         UIselectedSymbolID = "";
 
         for (x = 1; x <= MaxLayout; x++) {
             console.log(x + " " + Layout[x].SymbolID);
             if (Layout[x].SymbolID === 0) {
-                alert("Adding symbol");
+
                 UIselectedSymbolID = x;
                 Layout[x].SymbolID = UIsymbolToAdd;
 
@@ -219,6 +237,25 @@ canvas.addEventListener('mouseup', function (evt) {
         CurrentToolStatus = "symbolPic";
     }
 
+
+    if (CurrentToolStatus === "addConnection") {
+        if (Connections[UIselectedConnectionID].id1 === 0) {
+            Connections[UIselectedConnectionID].id1 = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+
+        } else if (Connections[UIselectedConnectionID].id2 === 0) {
+            Connections[UIselectedConnectionID].id2 = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+
+        }
+
+        if (Connections[UIselectedConnectionID].id1 & Connections[UIselectedConnectionID].id2) {
+            alert("Connection Created");
+            CurrentToolStatus = "symbolPic";
+        }
+
+
+    }
+
+
     renderLayout();
 }, false);
 
@@ -230,6 +267,18 @@ function UIaddSymbolButtonClick() {
     else {
         Alert("You must select a symbol");
     }
+}
+
+
+function UIaddConnectionButtonClick() {
+    for (x = 1; x <= MaxConnections; x++) {
+        if (Connections[x].id1 === 0) {
+            CurrentToolStatus = "addConnection";
+            UIselectedConnectionID = x;
+            break;
+        }
+    }
+
 }
 
 
@@ -295,15 +344,9 @@ function CheckLayoutSymbolClick(x, y) {
             return i;
         }
     }
+    return 0;
 }
 
-
-function RenderLayoutItem(id) {
-    if (Layout[id].SymbolID <= 0) return;
-    var img = new Image();
-    img.src = './symbols/' + Layout[id].SymbolID + '-Symbol.png';
-    drawRotatedImage(img, Layout[id].SchematicX, Layout[id].SchematicY, Layout[id].SchematicRotation);
-}
 
 function UIdrawPin(PinX, PinY, Collor) {
     context.beginPath();
@@ -311,6 +354,14 @@ function UIdrawPin(PinX, PinY, Collor) {
     context.fillStyle = Collor;
     context.fill();
     context.closePath();
+}
+
+function UIdrawLine(X1, Y1, X2, Y2) {
+
+    context.beginPath();
+    context.moveTo(Number(X1), Number(Y1));
+    context.lineTo(Number(X2), Number(Y2));
+    context.stroke();
 }
 
 
@@ -338,10 +389,13 @@ function drawRotatedImage(image, x, y, angle) {
 function renderLayout() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (x = 1; x <= MaxLayout; x++) {
-        RenderLayoutItem(x);
+        Layout[x].RenderLayoutItem();
         renderLayoutItemPoints(x);
     }
 
+    for (x = 1; x <= MaxConnections; x++) {
+        Connections[x].DrawMe();
+    }
 
     //renderLayoutItemPoints(UIselectedSymbolID);
 }
@@ -379,7 +433,7 @@ function renderLayoutItemPoints(id) {
         }
 
 
-        if (Number(Layout[id].SchematicRotation) === 90 ) {
+        if (Number(Layout[id].SchematicRotation) === 90) {
 
             PinX = PinX - (Symbols[Layout[id].SymbolID].width / 2);
             PinY = PinY - (Symbols[Layout[id].SymbolID].height / 2);
@@ -405,7 +459,6 @@ function renderLayoutItemPoints(id) {
 
     }
 }
-
 
 
 renderLayout();
