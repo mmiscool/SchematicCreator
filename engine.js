@@ -70,7 +70,7 @@ function CircuitConnections() {
         bla = Layout[this.id1].GivePointForPinID(this.pin1);
         console.log(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
 
-        if (Layout[this.id1].GivePointForPinID(this.pin1) === undefined || Layout[this.id2].GivePointForPinID(this.pin2) === undefined )return;
+        if (Layout[this.id1].GivePointForPinID(this.pin1) === undefined || Layout[this.id2].GivePointForPinID(this.pin2) === undefined) return;
 
         if (collor != undefined) {
             UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2), collor)
@@ -87,7 +87,6 @@ function CircuitConnections() {
         renderLayout();
         this.DrawMe("red");
     };
-
 
 
     this.extend = function (jsonString) {
@@ -630,6 +629,19 @@ function UIaddItemToSelect(id, optionToAdd, value) {
     document.getElementById(id).add(option);
 }
 
+function UIexportImage() {
+
+    if (canvas && context) {
+        var img = canvas.toDataURL("image/png;base64;");
+        //img = img.replace("image/png","image/octet-stream"); // force download, user would have to give the file name.
+        // you can also use anchor tag with download attribute to force download the canvas with file name.
+        window.open(img, "", "width=700,height=700");
+    }
+    else {
+        alert("Can not export");
+    }
+
+}
 
 function UIdisplayConnectionTable() {
 
