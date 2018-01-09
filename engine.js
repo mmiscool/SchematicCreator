@@ -242,10 +242,10 @@ function UIshowSymbolLayoutInfo() {
     }
     else {
         document.getElementById("LayoutID").value = UIselectedSymbolID;
-        document.getElementById("SymbolID").value = "";
-        document.getElementById("SchematicX").value = "";
-        document.getElementById("SchematicY").value = "";
-        document.getElementById("SchematicRotation").value = "";
+        document.getElementById("SymbolID").value = 0;
+        document.getElementById("SchematicX").value = 0;
+        document.getElementById("SchematicY").value = 0;
+        document.getElementById("SchematicRotation").value = 0;
     }
 
 }
@@ -407,14 +407,6 @@ function renderLayoutItemPoints(id) {
 }
 
 
-function rotate_point(cx, cy, angle, p) {
-    xxxx = Math.cos(angle) * (p.x - cx) - Math.sin(angle) * (p.y - cy) + cx;
-    yyyy = Math.sin(angle) * (p.x - cx) + Math.cos(angle) * (p.y - cy) + cy;
-    p.x = xxxx;
-    p.y = yyyy;
-    return p;
-
-}
 
 renderLayout();
 
