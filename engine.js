@@ -68,7 +68,9 @@ function CircuitConnections() {
         if (this.id2 === 0) return;
         console.log(this.pin1);
         bla = Layout[this.id1].GivePointForPinID(this.pin1);
-        //console.log(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
+        console.log(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
+
+        if (Layout[this.id1].GivePointForPinID(this.pin1) === undefined || Layout[this.id2].GivePointForPinID(this.pin2) === undefined )return;
 
         if (collor != undefined) {
             UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2), collor)
