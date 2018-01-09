@@ -88,9 +88,9 @@ function CircuitLayout() {
 
     this.UIupdateFromProperties = function () {
         this.SymbolID = document.getElementById("SymbolID").value;
-        this.SchematicX = document.getElementById("SchematicX").value;
-        this.SchematicY = document.getElementById("SchematicY").value;
-        this.SchematicRotation = document.getElementById("SchematicRotation").value;
+        this.SchematicX = Number(document.getElementById("SchematicX").value);
+        this.SchematicY = Number(document.getElementById("SchematicY").value);
+        this.SchematicRotation = Number(document.getElementById("SchematicRotation").value);
     };
 
 
@@ -169,7 +169,12 @@ function getMousePos(canvas, evt) {
 
 var canvas = document.getElementById('myCanvas');
 var context = canvas.getContext('2d');
-canvas.addEventListener("contextmenu", (event) => {    event.preventDefault();});
+canvas.addEventListener('contextmenu', function (e) {
+    if (e.button === 2) {
+        e.preventDefault();
+        return false;
+    }
+}, false);
 canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
 
@@ -360,10 +365,40 @@ function renderLayoutItemPoints(id) {
 
         PinCollor = "red";
 
+        point = new Object();
+
+        if (Number(Layout[id].SchematicRotation) === 0) {
+            PinX = PinX - (Symbols[Layout[id].SymbolID].width / 2);
+            PinY = PinY - (Symbols[Layout[id].SymbolID].height / 2);
+        }
 
 
-        PinX += Layout[id].SchematicX - Symbols[Layout[id].SymbolID].width/2;
-        PinY += Layout[id].SchematicY - Symbols[Layout[id].SymbolID].height/2;
+        if (Number(Layout[id].SchematicRotation) === 180) {
+            PinX = (Symbols[Layout[id].SymbolID].width / 2) - PinX;
+            PinY = (Symbols[Layout[id].SymbolID].height / 2) - PinY;
+        }
+
+
+        if (Number(Layout[id].SchematicRotation) === 90 ) {
+
+            PinX = PinX - (Symbols[Layout[id].SymbolID].width / 2);
+            PinY = PinY - (Symbols[Layout[id].SymbolID].height / 2);
+
+            [PinX, PinY] = [PinY, PinX];
+
+        }
+
+        if (Number(Layout[id].SchematicRotation) === 270) {
+
+            PinX = (Symbols[Layout[id].SymbolID].width / 2) - PinX;
+            PinY = (Symbols[Layout[id].SymbolID].height / 2) - PinY;
+
+            [PinX, PinY] = [PinY, PinX];
+
+        }
+
+        PinX += Layout[id].SchematicX;
+        PinY += Layout[id].SchematicY;
 
         UIdrawPin(PinX, PinY, PinCollor);
 
@@ -371,6 +406,15 @@ function renderLayoutItemPoints(id) {
     }
 }
 
+
+function rotate_point(cx, cy, angle, p) {
+    xxxx = Math.cos(angle) * (p.x - cx) - Math.sin(angle) * (p.y - cy) + cx;
+    yyyy = Math.sin(angle) * (p.x - cx) + Math.cos(angle) * (p.y - cy) + cy;
+    p.x = xxxx;
+    p.y = yyyy;
+    return p;
+
+}
 
 renderLayout();
 
