@@ -28,7 +28,7 @@ function CircuitSymbols() {
 
 var SymbolObject = new CircuitSymbols();
 
-SymbolObject.extend(BrowserStorage("Symbol",SymbolID,"Layout"));
+SymbolObject.extend(BrowserStorage("Symbol", SymbolID, "Layout"));
 
 document.getElementById("Name").value = SymbolObject.Name;
 
@@ -41,6 +41,34 @@ function UIsymbolButtonClick(ActionToBeTaken) {
 
 
     if (ActionToBeTaken === "-") UIremovePin();
+
+    if (ActionToBeTaken === "rename") UIrenamePin();
+
+
+}
+
+
+function UIrenamePin() {
+    OldPin = UICurrentlySelectedPin;
+    OldPinID = UICurrentlySelectedPin.split('|')[0];
+
+    NewPinID = prompt("Enter Pin ID", OldPinID);
+
+    var x = document.getElementById("PinListing");
+    x.remove(x.selectedIndex);
+    UIDrawPins();
+    UIloadItem();
+
+
+    if (NewPinID != null) {
+        UIaddItemToSelect("PinListing",
+            NewPinID + "|"
+            + OldPin.split('|')[1] + "|"
+            + OldPin.split('|')[2] + "|"
+            + OldPin.split('|')[3] + "|"
+            + OldPin.split('|')[4] + "|")
+    }
+    UIDrawPins();
 
 
 }
@@ -121,7 +149,7 @@ function UIDrawPins() {
     SymbolObject.Name = document.getElementById("Name").value;
     SymbolObject.Points = TotalPinListing;
 
-    BrowserStorageStore("Symbol",SymbolID,"Layout",JSON.stringify(SymbolObject));
+    BrowserStorageStore("Symbol", SymbolID, "Layout", JSON.stringify(SymbolObject));
 
 }
 

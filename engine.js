@@ -1,11 +1,24 @@
 var MaxSymbols = 5;
 var MaxLayout = 10;
-var MaxConnections = 5;
+var MaxConnections = 50;
 var CurrentToolStatus = "symbolPic";
 
 var UIselectedSymbolID;
 
 var SchematicID = new URL(window.location.href).searchParams.get("id");
+
+
+function Point() {
+    this.x = 0;
+    this.y = 0;
+    this.collor = "red";
+    this.name = "";
+
+    this.SetPoint = function (MyPointX, MyPointY) {
+        this.x = MyPointX;
+        this.y = MyPointY;
+    }
+}
 
 function CircuitSymbols() {
     this.delete = function () {
@@ -30,6 +43,7 @@ function CircuitSymbols() {
     this.delete();
 }
 
+
 function CircuitConnections() {
 
     this.delete = function () {
@@ -46,7 +60,10 @@ function CircuitConnections() {
     this.DrawMe = function () {
         if (this.id2 === 0) return;
 
-        UIdrawLine(Layout[this.id1].SchematicX, Layout[this.id1].SchematicY, Layout[this.id2].SchematicX, Layout[this.id2].SchematicY);
+        bla = Layout[this.id1].GivePointForPinID(this.pin1);
+        console.log(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
+
+        UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
         return "Drew the line";
     };
 
@@ -109,6 +126,97 @@ function CircuitLayout() {
         var img = new Image();
         img.src = './symbols/' + this.SymbolID + '-Symbol.png';
         drawRotatedImage(img, this.SchematicX, this.SchematicY, this.SchematicRotation);
+    };
+
+
+    this.RenderLayoutPoints = function () {
+        if (this.SymbolID <= 0) return;
+        UIeditMode = "Symbol";
+
+
+        pins = this.PinsListObject();
+
+
+
+        for (var i = 0; i < pins.length; i++) {
+            UIdrawPin(this.SchematicSymbolPoint(pins[i]));
+        }
+    };
+
+
+    this.GivePointForPinID = function (pinID) {
+        pins = this.PinsListObject();
+
+
+
+        for (var i = 0; i < pins.length; i++) {
+            if (pins[i].name === pinID) return this.SchematicSymbolPoint(pins[i]);
+        }
+    };
+
+    this.SchematicSymbolPoint = function (mypoint) {
+
+        if (Number(this.SchematicRotation) === 0) {
+            mypoint.x = mypoint.x - (Symbols[this.SymbolID].width / 2);
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].height / 2);
+        }
+
+
+        if (Number(this.SchematicRotation) === 180) {
+            mypoint.x = (Symbols[this.SymbolID].width / 2) - mypoint.x;
+            mypoint.y = (Symbols[this.SymbolID].height / 2) - mypoint.y;
+        }
+
+
+        if (Number(this.SchematicRotation) === 90) {
+
+            mypoint.x = mypoint.x - (Symbols[this.SymbolID].width / 2);
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].height / 2);
+
+            [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
+
+        }
+
+        if (Number(this.SchematicRotation) === 270) {
+
+            mypoint.x = (Symbols[this.SymbolID].width / 2) - mypoint.x;
+            mypoint.y = (Symbols[this.SymbolID].height / 2) - mypoint.y;
+
+            [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
+
+        }
+
+        mypoint.x += this.SchematicX;
+        mypoint.y += this.SchematicY;
+
+        return mypoint;
+
+    };
+
+
+    this.PinsListObject = function () {
+
+        pins = Symbols[this.SymbolID].Points.split('\n');
+        var ListOfPoints = [];
+
+        for (i = 0; i < pins.length; i++) {
+            var bla = new Point();
+            bla.name = pins[i].split('|')[0];
+            if (UIeditMode === "Symbol") {
+                bla.x = pins[i].split('|')[1];
+                bla.y = pins[i].split('|')[2];
+                ListOfPoints.push(bla);
+
+            }
+
+            if (UIeditMode === "Pads") {
+                bla.x = pins[i].split('|')[3];
+                bla.y = pins[i].split('|')[4];
+                ListOfPoints.push(bla);
+            }
+        }
+
+        return ListOfPoints;
     };
 
 
@@ -241,14 +349,15 @@ canvas.addEventListener('mouseup', function (evt) {
     if (CurrentToolStatus === "addConnection") {
         if (Connections[UIselectedConnectionID].id1 === 0) {
             Connections[UIselectedConnectionID].id1 = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+            Connections[UIselectedConnectionID].pin1 = "C";
 
         } else if (Connections[UIselectedConnectionID].id2 === 0) {
             Connections[UIselectedConnectionID].id2 = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
-
+            Connections[UIselectedConnectionID].pin2 = "C";
         }
 
-        if (Connections[UIselectedConnectionID].id1 & Connections[UIselectedConnectionID].id2) {
-            alert("Connection Created");
+        if (Connections[UIselectedConnectionID].id1 && Connections[UIselectedConnectionID].id2) {
+            //alert("Connection Created");
             CurrentToolStatus = "symbolPic";
         }
 
@@ -348,19 +457,21 @@ function CheckLayoutSymbolClick(x, y) {
 }
 
 
-function UIdrawPin(PinX, PinY, Collor) {
+function UIdrawPin(point) {
+    if (!point.x) ;
     context.beginPath();
-    context.arc(PinX, PinY, 3, 0, 2 * Math.PI, false);
-    context.fillStyle = Collor;
+    context.arc(point.x, point.y, 3, 0, 2 * Math.PI, false);
+    context.fillStyle = point.collor;
     context.fill();
     context.closePath();
 }
 
-function UIdrawLine(X1, Y1, X2, Y2) {
+function UIdrawLine(point1, point2) {
 
+    console.log(point1, point2);
     context.beginPath();
-    context.moveTo(Number(X1), Number(Y1));
-    context.lineTo(Number(X2), Number(Y2));
+    context.moveTo(Number(point1.x), Number(point1.y));
+    context.lineTo(Number(point2.x), Number(point2.y));
     context.stroke();
 }
 
@@ -390,7 +501,8 @@ function renderLayout() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (x = 1; x <= MaxLayout; x++) {
         Layout[x].RenderLayoutItem();
-        renderLayoutItemPoints(x);
+        Layout[x].RenderLayoutPoints();
+
     }
 
     for (x = 1; x <= MaxConnections; x++) {
@@ -398,66 +510,6 @@ function renderLayout() {
     }
 
     //renderLayoutItemPoints(UIselectedSymbolID);
-}
-
-function renderLayoutItemPoints(id) {
-    if (!id) return;
-    if (Layout[id].SymbolID <= 0) return;
-    UIeditMode = "Symbol";
-
-    pins = Symbols[Layout[id].SymbolID].Points.split('\n');
-    for (i = 0; i < pins.length; i++) {
-        if (UIeditMode === "Symbol") {
-            PinX = Number(pins[i].split('|')[1]);
-            PinY = Number(pins[i].split('|')[2]);
-        }
-
-        if (UIeditMode === "Pads") {
-            PinX = Number(pins[i].split('|')[3]);
-            PinY = Number(pins[i].split('|')[4]);
-        }
-
-        PinCollor = "red";
-
-        point = new Object();
-
-        if (Number(Layout[id].SchematicRotation) === 0) {
-            PinX = PinX - (Symbols[Layout[id].SymbolID].width / 2);
-            PinY = PinY - (Symbols[Layout[id].SymbolID].height / 2);
-        }
-
-
-        if (Number(Layout[id].SchematicRotation) === 180) {
-            PinX = (Symbols[Layout[id].SymbolID].width / 2) - PinX;
-            PinY = (Symbols[Layout[id].SymbolID].height / 2) - PinY;
-        }
-
-
-        if (Number(Layout[id].SchematicRotation) === 90) {
-
-            PinX = PinX - (Symbols[Layout[id].SymbolID].width / 2);
-            PinY = PinY - (Symbols[Layout[id].SymbolID].height / 2);
-
-            [PinX, PinY] = [PinY, PinX];
-
-        }
-
-        if (Number(Layout[id].SchematicRotation) === 270) {
-
-            PinX = (Symbols[Layout[id].SymbolID].width / 2) - PinX;
-            PinY = (Symbols[Layout[id].SymbolID].height / 2) - PinY;
-
-            [PinX, PinY] = [PinY, PinX];
-
-        }
-
-        PinX += Layout[id].SchematicX;
-        PinY += Layout[id].SchematicY;
-
-        UIdrawPin(PinX, PinY, PinCollor);
-
-
-    }
 }
 
 
