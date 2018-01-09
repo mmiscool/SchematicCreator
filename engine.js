@@ -171,7 +171,7 @@ function CircuitLayout() {
         if (Number(this.SchematicRotation) === 90) {
 
             mypoint.x = mypoint.x - (Symbols[this.SymbolID].width / 2);
-            mypoint.y = mypoint.y - (Symbols[this.SymbolID].height / 2);
+            mypoint.y = (Symbols[this.SymbolID].height / 2) - mypoint.y;
 
             [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
 
@@ -180,7 +180,8 @@ function CircuitLayout() {
         if (Number(this.SchematicRotation) === 270) {
 
             mypoint.x = (Symbols[this.SymbolID].width / 2) - mypoint.x;
-            mypoint.y = (Symbols[this.SymbolID].height / 2) - mypoint.y;
+
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].height / 2);
 
             [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
 
