@@ -86,6 +86,20 @@ function CircuitConnections() {
         this.DrawMe("red");
     };
 
+
+
+    this.extend = function (jsonString) {
+
+        try {
+            var obj = JSON.parse(jsonString)
+            for (var key in obj) {
+                this[key] = obj[key]
+            }
+        } catch (e) {
+        }
+    };
+
+
     this.delete();
 }
 
@@ -291,6 +305,7 @@ function UIloadStoredLayout() {
 
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x] = new CircuitConnections();
+        Connections[x].extend(BrowserStorage("Schematic", x, "Connection"));
     }
 
     for (x = 1; x <= MaxLayout; x++) {
@@ -303,13 +318,11 @@ function UIloadStoredLayout() {
 function UIsaveStoredLayout() {
 
     for (x = 1; x <= MaxConnections; x++) {
-        Connections[x] = new CircuitConnections();
-        BrowserStorageStore("Schematic", x, "Layout", JSON.stringify(Layout[x]));
+        BrowserStorageStore("Schematic", x, "Connection", JSON.stringify(Connections[x]));
     }
 
     for (x = 1; x <= MaxLayout; x++) {
         BrowserStorageStore("Schematic", x, "Layout", JSON.stringify(Layout[x]));
-
     }
 }
 

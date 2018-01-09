@@ -41,50 +41,40 @@
                     onchange="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
 
             </select>
-            <img id="SymbolPreviewImage" src="none.png" style="width:100px">
-            <div style="overflow: auto; max-height: 300px; border: black">
+            <div style="overflow: auto; height: 100px; border: black">
+                <img id="SymbolPreviewImage" src="none.png" style="width:100px">
+            </div>
+
+
+            <div style="overflow: auto; height: 300px; border: black">
 
                 <table id="ConnectionTable" border="1" style="border: 1px solid black;">
-                    <tr>
-                        <td>My Ordiginal junk</td>
-
-                        <td>My Ordiginal junk</td>
-
-                        <td>My Ordiginal junk</td>
-
-                        <td>My Ordiginal junk</td>
-
-                        <td>My Ordiginal junk</td>
-                    </tr>
-
                 </table>
             </div>
         </aside>
+
+
+        <aside class="right-sidebar">
+            <div>
+                Layout ID:<input type="text" id="LayoutID" value=""><br>
+                Symbol ID:<input type="text" id="SymbolID" value=""><br>
+                X:<input type="text" id="SchematicX" value=""><br>
+                Y:<input type="text" id="SchematicY" value=""><br>
+                Rotation:<input type="text" size="3" id="SchematicRotation" value="">
+                <input type="button" value="Left" onclick="UIsymbolLayoutButtonClick('rotate left');">
+                <input type="button" value="Right" onclick="UIsymbolLayoutButtonClick('rotate right');">
+                <br>
+
+                <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
+                <input type="button" value="Move" onclick="UIsymbolLayoutButtonClick('move');">
+                <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
+
+            </div>
+        </aside>
     </div>
-</div>
-</aside><!-- .left-sidebar -->
 
-<aside class="right-sidebar">
-    <div>
-        Layout ID:<input type="text" id="LayoutID" value=""><br>
-        Symbol ID:<input type="text" id="SymbolID" value=""><br>
-        X:<input type="text" id="SchematicX" value=""><br>
-        Y:<input type="text" id="SchematicY" value=""><br>
-        Rotation:<input type="text" size="3" id="SchematicRotation" value="">
-        <input type="button" value="Left" onclick="UIsymbolLayoutButtonClick('rotate left');">
-        <input type="button" value="Right" onclick="UIsymbolLayoutButtonClick('rotate right');">
-        <br>
-
-        <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
-        <input type="button" value="Move" onclick="UIsymbolLayoutButtonClick('move');">
-        <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
-
-    </div>
-</aside><!-- .right-sidebar -->
-
-</div><!-- .middle-->
-
-</div><!-- .wrapper -->
+<!-- .left-sidebar -->
+<!-- .right-sidebar -->
 
 
 <footer class="footer">
@@ -93,8 +83,8 @@
     Schematic Creator (C) Michael Molinari 2018
 
 </footer><!-- .footer -->
+</div>
 
-</body>
 </html>
 
 <script src="engine.js"></script>
