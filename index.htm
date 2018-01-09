@@ -7,9 +7,9 @@
     <meta name="description" content=""/>
     <link href="style.css" rel="stylesheet">
 
-<style>
+    <style>
 
-</style>
+    </style>
 </head>
 
 <div class="wrapper">
@@ -18,6 +18,7 @@
 
         <a href="SymbolEditor.htm">Symbol Editor</a><br>
         <input type="button" value="Save" onclick="UIsaveStoredLayout();">
+        <input type="button" onclick="UIdisplayConnectionTable()" value="Create Table From JSON"/>
     </header><!-- .header-->
 
     <div class="middle">
@@ -26,8 +27,7 @@
             <main class="content">
 
 
-
-                <canvas id="myCanvas" width="5000" height="5000"  style="width:5000px;height:5000px;">
+                <canvas id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;">
                     Your browser does not support the HTML5 canvas tag.
                 </canvas>
 
@@ -69,7 +69,24 @@
 
 
 <footer class="footer">
+
+    <table id="ConnectionTable">
+        <tr>
+            <td>My Ordiginal junk</td>
+
+            <td>My Ordiginal junk</td>
+
+            <td>My Ordiginal junk</td>
+
+            <td>My Ordiginal junk</td>
+
+            <td>My Ordiginal junk</td>
+        </tr>
+
+    </table>
+
     Schematic Creator (C) Michael Molinari 2018
+
 </footer><!-- .footer -->
 
 </body>
@@ -79,3 +96,4 @@
 <script>
 
 </script>
+

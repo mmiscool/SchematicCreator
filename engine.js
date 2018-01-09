@@ -130,7 +130,7 @@ function CircuitLayout() {
     };
 
 
-    this.RenderLayoutPoints = function ( checkIfPointClickedHack) {
+    this.RenderLayoutPoints = function (checkIfPointClickedHack) {
 
 
         if (this.SymbolID <= 0) return;
@@ -143,9 +143,9 @@ function CircuitLayout() {
         for (var i = 0; i < pins.length; i++) {
             if (checkIfPointClickedHack != undefined) {
                 //console.log("my point" , checkIfPointClickedHack);
-                    myTempppOint = this.SchematicSymbolPoint(pins[i]);
+                myTempppOint = this.SchematicSymbolPoint(pins[i]);
 
-                    console.log(checkIfPointClickedHack, myTempppOint)
+                console.log(checkIfPointClickedHack, myTempppOint)
 
 
                 if (
@@ -589,4 +589,31 @@ function UIaddItemToSelect(id, optionToAdd, value) {
     option.text = optionToAdd;
     option.value = value
     document.getElementById(id).add(option);
+}
+
+
+function UIdisplayConnectionTable()
+{
+
+    var table = document.getElementById("ConnectionTable");
+
+    for (x = 1; x <= MaxConnections; x++) {
+
+        if (Connections[x].id2)
+        {
+
+            var row = table.insertRow(-1);
+
+
+            row.insertCell(0).innerHTML = Connections[x].id1 ;
+            row.insertCell(1).innerHTML = Connections[x].pin1 ;
+            row.insertCell(2).innerHTML = Connections[x].id2 ;
+            row.insertCell(3).innerHTML = Connections[x].pin2 ;
+            row.insertCell(4).innerHTML = Connections[x].jogged ;
+            row.insertCell(5).innerHTML = Connections[x].jogPosition ;
+        }
+
+    }
+
+
 }
