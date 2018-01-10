@@ -379,9 +379,13 @@ canvas.addEventListener('mouseup', function (evt) {
 
     if (CurrentToolStatus === "moveSymbol") {
         //UIselectedSymbolID = document.getElementById("LayoutID").value;
-        Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
-        UIshowSymbolLayoutInfo(UIselectedSymbolID);
-        CurrentToolStatus = "symbolPic";
+        if(Layout[UIselectedSymbolID] !== undefined)
+        {
+            Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
+            UIshowSymbolLayoutInfo(UIselectedSymbolID);
+            CurrentToolStatus = "symbolPic";
+        }
+
     }
 
 
@@ -423,6 +427,11 @@ canvas.addEventListener('mouseup', function (evt) {
         } else if (Connections[UIselectedConnectionID].id2 === 0) {
 
             bla = CheckLayoutSymbolPinClick(mousePos.x, mousePos.y);
+            console.log(Connections[UIselectedConnectionID].id1 , bla.id , Connections[UIselectedConnectionID].pin1, bla.pin);
+            if (Connections[UIselectedConnectionID].id1 == bla.id &&Connections[UIselectedConnectionID].pin1 == bla.pin){
+                renderLayout();
+                return;
+            }
             if (bla) {
                 Connections[UIselectedConnectionID].id2 = bla.id;
                 Connections[UIselectedConnectionID].pin2 = bla.pin;
