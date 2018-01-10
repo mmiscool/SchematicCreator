@@ -1,27 +1,35 @@
-# Laravel PHP Framework
+The javascript portion of this project is stored in the directory public/SchematicEditor.
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+The goal of this project is to make an open source schematic capture and PCB layout tool that is 100% browser based. 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+The rest of the files in the project are the files required for a laravel PHP system to provide server side storaage of data. 
+The javascript portion is the main focus and is designed to be able to be used with out the server side functionality dso that this tool can be intergrated in to what ever system desired as the end product. 
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
 
-## Official Documentation
+Stay tuned for updates in this.
+This software is not production ready and has almost none of the required functionality as of now.
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+Implmented features include.
+-Schematic symbol creation tool
+  -Captures pin locations on symbol
+  -Captures pin locations on pcb pad
+-Schematic layout of symbols
+  -Placement of symbols in workspace
+  -Orientation of symbols in workspace
+-Connection tool
+  -Captures symbol id and pin for a from and to device
+  -Visualises the connnection as a line between the connected points
+    -Lacking currently the capability of placing jogs in a conection line (visualised as a direct line)
+  -Displays data in table for each connection (symbol and pin IDs)
+-PCB layout tool
+  -data structures in place to hold symbol placement and orientation
+  -No other devemloment has taken place yet.
+  
+  
+Todo
+-Connection tool
+  -Add capability of placing points on line connection objects to shape the path
+  -Selection of conection line from the graphics area.
+-PCB layout tool
+  -EVERY THING !!!!!!!!!!
+    
