@@ -1,6 +1,6 @@
-The javascript portion of this project is stored in the directory public/SchematicEditor.
+# The javascript portion of this project is stored in the directory public/SchematicEditor.
 
-The goal of this project is to make an open source schematic capture and PCB layout tool that is 100% browser based. 
+# The goal of this project is to make an open source schematic capture and PCB layout tool that is 100% browser based. 
 
 The rest of the files in the project are the files required for a laravel PHP system to provide server side storaage of data. 
 The javascript portion is the main focus and is designed to be able to be used with out the server side functionality dso that this tool can be intergrated in to what ever system desired as the end product. 
@@ -9,7 +9,7 @@ The javascript portion is the main focus and is designed to be able to be used w
 Stay tuned for updates in this.
 This software is not production ready and has almost none of the required functionality as of now.
 
-Implmented features include.
+# Implmented features include.
 - Schematic symbol creation tool
   - Captures pin locations on symbol
   - Captures pin locations on pcb pad
@@ -26,7 +26,7 @@ Implmented features include.
   - No other devemloment has taken place yet.
   
   
-Todo
+# Todo
 - Connection tool
   - Add capability of placing points on line connection objects to shape the path
   - Selection of conection line from the graphics area.
