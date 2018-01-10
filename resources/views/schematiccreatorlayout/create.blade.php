@@ -22,6 +22,7 @@
             <label for="LayoutData">LayoutData</label>
             <input id="LayoutData" name = "LayoutData" type="text" class="form-control">
         </div>
+
         <button class = 'btn btn-success' type ='submit'> <i class="fa fa-floppy-o"></i> Save</button>
     </form>
 </section>

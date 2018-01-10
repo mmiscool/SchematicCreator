@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Schematiccreatorsymbol;
 use Amranidev\Ajaxis\Ajaxis;
 use URL;
+use Storage;
+use App\Fileentry;
 
 /**
  * Class SchematiccreatorsymbolController.
@@ -63,10 +65,11 @@ class SchematiccreatorsymbolController extends Controller
         
         $schematiccreatorsymbol->ExtraAtributes = $request->ExtraAtributes;
 
-        
-        
-        $schematiccreatorsymbol->save();
 
+        $schematiccreatorsymbol->save();
+      //  dd($request->hasFile('upload'));
+
+        $request->upload->storeAs('public/symbols', $schematiccreatorsymbol->id . "-Symbol.png");
 
         return redirect('schematiccreatorsymbol/'.$schematiccreatorsymbol->id.'/edit/');
     }

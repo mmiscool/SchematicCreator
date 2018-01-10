@@ -34,8 +34,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="LayoutData">LayoutData</label>
-                                <input id="LayoutData" name="LayoutData" type="text" class="form-control"
-                                       value="{!!$schematiccreatorlayout->LayoutData!!}">
+
+                                <textarea id="LayoutData" name="LayoutData" type="text" style="display:none;">
+                                    {!!$schematiccreatorlayout->LayoutData!!}
+                                </textarea>
+
                             </div>
                             <button class='btn btn-success' type='submit'><i class="fa fa-floppy-o"></i> Update</button>
                         </form>
@@ -45,12 +48,73 @@
         </div>
 
         <script>
-            function onMyFrameLoad() {
-                alert('myframe is loaded');
-            };
+
+            reading = 0;
+            window.addEventListener("storage", function () {
+                ExportToLocalFile();
+            }, false);
+
+            function ExportToLocalFile() {
+                if (reading == 1) return;
+                reading = 1;
+                var bla;
+                var lengthOfLocalStorage = localStorage.length;
+                bla = lengthOfLocalStorage.toString();
+                for (var i = 0, len = localStorage.length; i < len; i++) {
+                    if (localStorage.key(i).includes('Schematic-')) {
+
+                        var key = localStorage.key(i);
+                        var value = localStorage[key];
+
+                        bla += "\n" + key + "\n" + value;
+
+
+                    }
+
+                }
+                document.getElementById('LayoutData').value = bla;
+                reading = 0;
+            }
+
+
+            function purgelocalfile() {
+                var bla = [];
+                for (var i = 0, len = localStorage.length; i < len; i++) {
+                    if (localStorage.key(i).includes('Schematic-')) {
+                        bla[i] = localStorage.key(i);
+                    }
+                }
+
+                len = localStorage.length
+                for (var i = 0; i < len; i++) {
+
+                    localStorage.removeItem(bla[i]);
+
+                }
+
+            }
+
+            function readSingleFile() {
+                reading = 1;
+                purgelocalfile();
+                var arrayOfLines = document.getElementById('LayoutData').value.split("\n");
+                //alert(arrayOfLines[0]);
+
+                for (var i = 0; i < arrayOfLines[0]; i++) {
+                    localStorage.setItem(arrayOfLines[i * 2 + 1], arrayOfLines[i * 2 + 2]);
+                }
+                reading = 0;
+            }
+
+            window.addEventListener("load", function(){
+                readSingleFile();
+                document.getElementById('cad').contentWindow.location.reload();
+            });
+
         </script>
 
-        <iframe id='cad' src="../../../../../SchematicEditor/?id={!!$schematiccreatorlayout->id!!}" style="background:white"></iframe>
+        <iframe id='cad' src="../../../../../SchematicEditor/?id={!!$schematiccreatorlayout->id!!}"
+                style="background:white"></iframe>
 
 
     </section>

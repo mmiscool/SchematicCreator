@@ -8,7 +8,7 @@
     </h1>
     <a href="{!!url('schematiccreatorsymbol')!!}" class = 'btn btn-danger'><i class="fa fa-home"></i> Schematiccreatorsymbol Index</a>
     <br>
-    <form method = 'POST' action = '{!!url("schematiccreatorsymbol")!!}'>
+    <form method = 'POST' action = '{!!url("schematiccreatorsymbol")!!}' enctype="multipart/form-data">
         <input type = 'hidden' name = '_token' value = '{{Session::token()}}'>
         <div class="form-group">
             <label for="name">name</label>
@@ -26,6 +26,9 @@
             <label for="ExtraAtributes">ExtraAtributes</label>
             <input id="ExtraAtributes" name = "ExtraAtributes" type="text" class="form-control">
         </div>
+
+        <input type="file" id="upload"  name="upload" accept=".png">
+
         <button class = 'btn btn-success' type ='submit'> <i class="fa fa-floppy-o"></i> Save</button>
     </form>
 </section>

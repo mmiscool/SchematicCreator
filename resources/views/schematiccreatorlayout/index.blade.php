@@ -13,7 +13,7 @@
             <thead>
             <th>Name</th>
             <th>Description</th>
-            
+
             <th>actions</th>
             </thead>
             <tbody>

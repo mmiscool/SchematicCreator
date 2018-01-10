@@ -347,6 +347,9 @@ canvas.addEventListener('contextmenu', function (e) {
         return false;
     }
 }, false);
+canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
+
+
 canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
 

@@ -103,7 +103,7 @@ function UIloadItem() {
     }
 
     var img = new Image();
-    img.src = './symbols/' + SymbolID + "-" + UIeditMode + '.png';
+    img.src = '../../../../storage/symbols/' + SymbolID + "-" + UIeditMode + '.png';
     img.onload = function () {
         context.drawImage(img, 0, 0);
         UIDrawPins();
