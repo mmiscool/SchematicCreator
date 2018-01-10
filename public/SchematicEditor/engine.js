@@ -349,14 +349,26 @@ canvas.addEventListener('contextmenu', function (e) {
 }, false);
 canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
 
+var detextifdrag = new Object();
+
+canvas.addEventListener('mousedown', function (evt) {
+    detextifdrag = getMousePos(canvas, evt);
+});
+
 
 canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
+    console.log(detextifdrag , mousePos );
+    if (detextifdrag.x != mousePos.x && detextifdrag.y != mousePos.y  )
+    {
+        UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x,detextifdrag.y);
+        CurrentToolStatus = "moveSymbol";
+    }
 
     console.log(CheckLayoutSymbolPinClick(mousePos.x, mousePos.y));
     console.log(CheckLayoutSymbolClick(mousePos.x, mousePos.y));
 
-    if (evt.button === 2 && UIselectedSymbolID) CurrentToolStatus = "moveSymbol";
+    //if (evt.button === 2 && UIselectedSymbolID) CurrentToolStatus = "moveSymbol";
 
     if (CurrentToolStatus === "symbolPic") {
         UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
@@ -366,7 +378,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
 
     if (CurrentToolStatus === "moveSymbol") {
-        UIselectedSymbolID = document.getElementById("LayoutID").value;
+        //UIselectedSymbolID = document.getElementById("LayoutID").value;
         Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
         CurrentToolStatus = "symbolPic";
