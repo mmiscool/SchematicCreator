@@ -1,0 +1,45 @@
+{
+    "name": "vinkla/pusher",
+    "description": "A Pusher bridge for Laravel",
+    "license": "MIT",
+    "keywords": ["laravel", "pusher", "http", "api", "php-pusher-server", "rest", "realtime", "trigger", "publish", "events"],
+    "authors": [
+        {
+            "name": "Vincent Klaiber",
+            "email": "hello@vinkla.com",
+            "homepage": "https://vinkla.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "illuminate/contracts": "5.3.* || 5.4.*",
+        "illuminate/support": "5.3.* || 5.4.*",
+        "graham-campbell/manager": "^2.5",
+        "pusher/pusher-php-server": "^2.6"
+    },
+    "require-dev": {
+        "graham-campbell/testbench": "^3.3",
+        "mockery/mockery": "^0.9.5",
+        "phpunit/phpunit": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vinkla\\Pusher\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Vinkla\\Tests\\Pusher\\": "tests/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.5-dev"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
