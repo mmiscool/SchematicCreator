@@ -158,7 +158,7 @@ function CircuitLayout() {
     this.RenderLayoutItem = function () {
         if (this.SymbolID <= 0) return;
         var img = new Image();
-        img.src = './symbols/' + this.SymbolID + '-Symbol.png';
+        img.src = '../../../Storage/Symbols/' + this.SymbolID + '-Symbol.png';
         drawRotatedImage(img, this.SchematicX, this.SchematicY, this.SchematicRotation);
     };
 
@@ -642,7 +642,7 @@ var UIsymbolToAdd = "";
 
 function UISymbolAdderSelectClick(thing) {
     UIsymbolToAdd = thing;
-    document.getElementById('SymbolPreviewImage').src = "./Symbols/" + UIsymbolToAdd + '-Symbol.png';
+    document.getElementById('SymbolPreviewImage').src = "../../../Storage/Symbols/" + UIsymbolToAdd + '-Symbol.png';
 }
 
 function UIaddItemToSelect(id, optionToAdd, value) {
