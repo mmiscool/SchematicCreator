@@ -4,7 +4,7 @@
 
 <section class="content">
     <h1>
-        Schematiccreatorsymbol Index
+        Symbols Manager
     </h1>
     <a href='{!!url("schematiccreatorsymbol")!!}/create' class = 'btn btn-success'><i class="fa fa-plus"></i> New</a>
     <br>
@@ -12,7 +12,8 @@
     <table class = "table table-striped table-bordered table-hover" style = 'background:#fff'>
         <thead>
             <th>name</th>
-            <th>symbolData</th>
+            <th>Symbol</th>
+
             <th>Description</th>
             <th>ExtraAtributes</th>
             <th>actions</th>
@@ -21,7 +22,12 @@
             @foreach($schematiccreatorsymbols as $schematiccreatorsymbol) 
             <tr>
                 <td>{!!$schematiccreatorsymbol->name!!}</td>
-                <td>{!!$schematiccreatorsymbol->symbolData!!}</td>
+                <td>
+                    <img src ='../../../../storage/symbols/{!!$schematiccreatorsymbol->id!!}-Symbol.png'
+                    style="    height: 50%;
+    width: auto;">
+                </td>
+
                 <td>{!!$schematiccreatorsymbol->Description!!}</td>
                 <td>{!!$schematiccreatorsymbol->ExtraAtributes!!}</td>
                 <td>

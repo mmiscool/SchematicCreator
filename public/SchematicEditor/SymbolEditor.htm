@@ -14,15 +14,16 @@
 
     <header class="header">
 
-        <a href="index.htm">Scematic Editor</a>
+
 
         Edit Mode:
         <select onchange="UIsetEditMode(this.options[this.selectedIndex].text);">
             <option>Symbol</option>
             <option>Pads</option>
         </select>
-        <br>
+
         Symbol Name<input type="text" id="Name" value="" onchange="UIloadItem()">
+        Ref Desigantor Prefix<input type="text" id="ReferenceDesignator" value="" onchange="UIloadItem()">
     </header><!-- .header-->
 
     <div class="middle">
@@ -38,9 +39,9 @@
         </div><!-- .container-->
 
         <aside class="left-sidebar">
-            <input type="button" value="Load Symbol To Editor" onclick="UIsymbolButtonClick('load');"><br>
-            <input type="button" value="+" onclick="UIsymbolButtonClick('+');"><br>
-            <input type="button" value="-" onclick="UIsymbolButtonClick('-');"><br>
+
+            <input type="button" value="+" onclick="UIsymbolButtonClick('+');">
+            <input type="button" value="-" onclick="UIsymbolButtonClick('-');">
             <input type="button" value="Rename" onclick="UIsymbolButtonClick('rename');"><br>
             <select id="PinListing" size="20" style="width: 90%;"
                     onchange="UIpinSelectClick(this.options[this.selectedIndex].text);">

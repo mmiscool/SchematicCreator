@@ -20,11 +20,10 @@
                         <form method='POST' action='{!! url("schematiccreatorsymbol")!!}/{!!$schematiccreatorsymbol->
         id!!}/update'>
                             <input type='hidden' name='_token' value='{{Session::token()}}'>
-                            <div class="form-group">
+
                                 <label for="name">name</label>
-                                <input id="name" name="name" type="text" class="form-control" value="{!!$schematiccreatorsymbol->
-            name!!}">
-                            </div>
+                            <input type='hidden'  id="name" name="name" type="text" class="form-control" value="{!!$schematiccreatorsymbol->name!!}">
+
                             <div class="form-group">
                                 <label for="symbolData">symbolData</label>
                                 <textarea id="symbolData" name="symbolData" type="text" style="display:none;" >
@@ -73,6 +72,7 @@
             function ExportToLocalFile()
             {
                 document.getElementById('symbolData').value = BrowserStorage("Symbol", "{!!$schematiccreatorsymbol->id!!}", "Layout");
+                document.getElementById('name').value = BrowserStorage("Symbol", "{!!$schematiccreatorsymbol->id!!}", "Name");
             }
 
             window.addEventListener("storage", function () {

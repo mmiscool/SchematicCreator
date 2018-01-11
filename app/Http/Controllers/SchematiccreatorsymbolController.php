@@ -135,7 +135,7 @@ class SchematiccreatorsymbolController extends Controller
         
         $schematiccreatorsymbol->save();
 
-        return redirect('schematiccreatorsymbol');
+        return redirect('schematiccreatorsymbol/'.$schematiccreatorsymbol->id.'/edit/');
     }
 
     /**

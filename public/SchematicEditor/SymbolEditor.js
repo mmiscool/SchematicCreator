@@ -6,6 +6,7 @@ var SymbolID = new URL(window.location.href).searchParams.get("id");
 function CircuitSymbols() {
     this.delete = function () {
         this.Name = "";
+        this.ReferenceDesignator = "";
         this.Points = "";
         this.width = 0;
         this.height = 0;
@@ -31,11 +32,12 @@ var SymbolObject = new CircuitSymbols();
 SymbolObject.extend(BrowserStorage("Symbol", SymbolID, "Layout"));
 
 document.getElementById("Name").value = SymbolObject.Name;
+document.getElementById("ReferenceDesignator").value = SymbolObject.ReferenceDesignator;
 
 function UIsymbolButtonClick(ActionToBeTaken) {
     if (!ActionToBeTaken) return;
 
-    if (ActionToBeTaken === "load") UIloadItem();
+    if (ActionToBeTaken === "save") UIloadItem();
 
     if (ActionToBeTaken === "+") UInewPin();
 
@@ -147,9 +149,11 @@ function UIDrawPins() {
     }
 
     SymbolObject.Name = document.getElementById("Name").value;
+    SymbolObject.ReferenceDesignator = document.getElementById("ReferenceDesignator").value;
     SymbolObject.Points = TotalPinListing;
 
     BrowserStorageStore("Symbol", SymbolID, "Layout", JSON.stringify(SymbolObject));
+    BrowserStorageStore("Symbol", SymbolID, "Name", SymbolObject.Name);
 
 }
 
@@ -185,8 +189,8 @@ function UIaddItemToSelect(id, optionToAdd) {
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
+        x: parseInt(evt.clientX - rect.left),
+        y: parseInt(evt.clientY - rect.top)
     };
 }
 

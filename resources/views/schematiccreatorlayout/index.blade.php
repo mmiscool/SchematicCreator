@@ -4,7 +4,7 @@
 
     <section class="content">
         <h1>
-            Schematiccreatorlayout Index
+            Shematic Manager
         </h1>
         <a href='{!!url("schematiccreatorlayout")!!}/create' class='btn btn-success'><i class="fa fa-plus"></i> New</a>
         <br>

@@ -126,7 +126,7 @@ class SchematiccreatorlayoutController extends Controller
         
         $schematiccreatorlayout->save();
 
-        return redirect('schematiccreatorlayout');
+        return redirect('schematiccreatorlayout/'.$schematiccreatorlayout->id.'/edit/');
     }
 
     /**
