@@ -3,66 +3,77 @@
         display: flex;
         overflow: hidden;
     }
+
     .flex-container > * {
         flex: 0 0 auto;
         overflow: scroll;
     }
+
     .stretchy {
         flex: 1 1 auto;
     }
+
     .column {
         flex-direction: column;
     }
+
     html,
     body,
     .full-screen {
         height: 100%;
     }
+
     body {
         margin: 0;
     }
+
     .full-screen {
         display: flex;
         overflow: hidden;
         flex-direction: column;
     }
+
     .full-screen > * {
         flex: 0 0 auto;
         overflow: scroll;
     }
-    .full-screen > .header
-    {
+
+    .full-screen > .header {
         height: 50px;
         background: #aafff0;
         color: white;
     }
+
     .full-screen > .footer {
         height: 25px;
         background: #555;
         color: white;
         overflow: hidden;
     }
+
     .full-screen > .main {
         flex: 1 1 auto;
         display: flex;
         overflow: hidden;
     }
+
     .full-screen > .main > * {
         flex: 0 0 auto;
         overflow: scroll;
     }
+
     .full-screen > .main > .left,
     .full-screen > .main > .right {
         resize: horizontal;
         width: 200px;
         background: #eee;
     }
+
     .full-screen > .main > .middle {
         flex: 1 1 auto;
     }
 
 </style>
-
 
 
 <div class="full-screen">
@@ -88,10 +99,10 @@
 
 
             <div style="overflow: auto; height: 300px; border: black">
-
                 <table id="ConnectionTable" border="1" style="border: 1px solid black;">
                 </table>
             </div>
+
         </div>
         <div class="middle">
 
@@ -118,13 +129,18 @@
                 <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
 
             </div>
-
+            <div style="overflow: auto; height: 300px; border: black">
+                <table id="DevicesTable" border="1" style="border: 1px solid black;">
+                </table>
+            </div>
         </div>
     </div>
     <div class="footer">(c) 2017 Michael Molinari</div>
 </div>
-
-
+<div style="overflow: auto; height: 300px; border: black">
+    <table id="DevicesTable" border="1" style="border: 1px solid black;">
+    </table>
+</div>
 
 <script src="engine.js"></script>
 <script>

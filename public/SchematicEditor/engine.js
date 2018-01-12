@@ -4,6 +4,7 @@ var MaxConnections = 100;
 var CurrentToolStatus = "symbolPic";
 
 var UIselectedSymbolID;
+var UIselectedConnectionID;
 var UIscale = .5;
 
 var SchematicID = new URL(window.location.href).searchParams.get("id");
@@ -86,7 +87,8 @@ function CircuitConnections() {
         return "Drew the line";
     };
 
-    this.Select = function () {
+    this.Select = function (bla) {
+        UIselectedConnectionID = bla;
         renderLayout();
         this.DrawMe("red");
     };
@@ -119,6 +121,12 @@ function CircuitLayout() {
         this.PadY = 0;
         this.PadRotation = 0;
         return "deleted";
+    };
+
+    this.remove = function () {
+        //deletes the item and rerenders
+        this.delete();
+        renderLayout();
     };
 
     this.moveSymbol = function (x, y) {
@@ -654,6 +662,7 @@ function renderLayout() {
         Connections[x].DrawMe();
     }
     UIdisplayConnectionTable();
+    UIdisplayDevicesTable();
     //renderLayoutItemPoints(UIselectedSymbolID);
 }
 
@@ -702,11 +711,59 @@ function UIexportImage() {
 
 }
 
+function UIdisplayDevicesTable() {
+
+    var table = document.getElementById("DevicesTable");
+
+    table.innerHTML = "";
+    var row = table.insertRow(-1);
+    row.insertCell(0).innerHTML = "Actions";
+    row.insertCell(1).innerHTML = "ID";
+    row.insertCell(2).innerHTML = "Ref Designator";
+
+
+
+    for (x = 1; x <= MaxLayout; x++) {
+
+        if (Layout[x].SymbolID) {
+
+            var row = table.insertRow(-1);
+
+            var bla = document.createElement("div");
+
+            var button = document.createElement("button");
+            button.innerHTML = "-";
+            button.id = x;
+            button.setAttribute("onClick", "Layout[" + x + "].remove();");
+            bla.appendChild(button);
+
+            var button = document.createElement("button");
+            button.innerHTML = "Select";
+            button.id = x;
+            button.setAttribute("onClick", "Layout[" + x + "].Select();");
+            bla.appendChild(button);
+            row.insertCell(0).appendChild(bla);
+
+
+            row.insertCell(1).innerHTML = x;
+            row.insertCell(2).innerHTML = Layout[x].ReferenceDesignator;
+            if( UIselectedSymbolID === x) row.style.backgroundColor = "red" ;
+        }
+
+    }
+
+
+}
+
+
+
 function UIdisplayConnectionTable() {
 
     var table = document.getElementById("ConnectionTable");
     table.innerHTML = "";
     var row = table.insertRow(-1);
+
+
     row.insertCell(0).innerHTML = "Actions";
     row.insertCell(1).innerHTML = "id1";
     row.insertCell(2).innerHTML = "pin1";
@@ -714,8 +771,6 @@ function UIdisplayConnectionTable() {
     row.insertCell(4).innerHTML = "pin2";
     row.insertCell(5).innerHTML = "Jogged";
     row.insertCell(6).innerHTML = "jogPosition";
-
-
     for (x = 1; x <= MaxConnections; x++) {
 
         if (Connections[x].id2) {
@@ -728,12 +783,12 @@ function UIdisplayConnectionTable() {
             button.innerHTML = "-";
             button.id = x;
             button.setAttribute("onClick", "Connections[" + x + "].remove();");
-            bla.appendChild(button)
+            bla.appendChild(button);
 
             var button = document.createElement("button");
             button.innerHTML = "Select";
             button.id = x;
-            button.setAttribute("onClick", "Connections[" + x + "].Select();");
+            button.setAttribute("onClick", "Connections[" + x + "].Select(" + x + ");");
             bla.appendChild(button);
             row.insertCell(0).appendChild(bla);
 
@@ -744,6 +799,8 @@ function UIdisplayConnectionTable() {
             row.insertCell(4).innerHTML = Connections[x].pin2;
             row.insertCell(5).innerHTML = Connections[x].jogged;
             row.insertCell(6).innerHTML = Connections[x].jogPosition;
+
+            if( UIselectedConnectionID === x) row.style.backgroundColor = "red" ;
         }
 
     }
