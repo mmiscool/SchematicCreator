@@ -56,6 +56,7 @@ function CircuitConnections() {
         this.pin2 = "";
         this.jogged = "";
         this.jogPosition = 0;
+        this.linePoints = [] ;
         return "deleted";
     };
 

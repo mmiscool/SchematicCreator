@@ -1,42 +1,81 @@
-<html>
-<head>
-    <meta charset="utf-8"/>
+<style>
+    .flex-container {
+        display: flex;
+        overflow: hidden;
+    }
+    .flex-container > * {
+        flex: 0 0 auto;
+        overflow: scroll;
+    }
+    .stretchy {
+        flex: 1 1 auto;
+    }
+    .column {
+        flex-direction: column;
+    }
+    html,
+    body,
+    .full-screen {
+        height: 100%;
+    }
+    body {
+        margin: 0;
+    }
+    .full-screen {
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
+    }
+    .full-screen > * {
+        flex: 0 0 auto;
+        overflow: scroll;
+    }
+    .full-screen > .header
+    {
+        height: 50px;
+        background: #aafff0;
+        color: white;
+    }
+    .full-screen > .footer {
+        height: 25px;
+        background: #555;
+        color: white;
+        overflow: hidden;
+    }
+    .full-screen > .main {
+        flex: 1 1 auto;
+        display: flex;
+        overflow: hidden;
+    }
+    .full-screen > .main > * {
+        flex: 0 0 auto;
+        overflow: scroll;
+    }
+    .full-screen > .main > .left,
+    .full-screen > .main > .right {
+        resize: horizontal;
+        width: 200px;
+        background: #eee;
+    }
+    .full-screen > .main > .middle {
+        flex: 1 1 auto;
+    }
 
-    <title></title>
-    <meta name="keywords" content=""/>
-    <meta name="description" content=""/>
-    <link href="style.css" rel="stylesheet">
+</style>
 
-    <style>
 
-    </style>
-</head>
 
-<div class="wrapper">
-
-    <header class="header">
-
-        <a href="SymbolEditor.htm">Symbol Editor</a><br>
+<div class="full-screen">
+    <div class="header">
+        <a href="SymbolEditor.htm">Symbol Editor</a>
         <input type="button" value="Save" onclick="UIsaveStoredLayout();">
         <input type="button" value="Export as PNG" onclick="UIexportImage()">
         <a href="javscript:void(0)" onclick="UIexportImage()">Export</a>
         <input type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()" value=".5">
-    </header><!-- .header-->
 
-    <div class="middle">
-
-        <div class="container">
-            <main class="content">
-
-
-                <canvas id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;">
-                    Your browser does not support the HTML5 canvas tag.
-                </canvas>
-
-            </main><!-- .content -->
-        </div><!-- .container-->
-
-        <aside class="left-sidebar">
+    </div>
+    <div class="main">
+        <div class="left">
             <input type="button" value="Add Symbol" onclick="UIaddSymbolButtonClick();">
             <input type="button" value="Add Connection" onclick="UIaddConnectionButtonClick();">
             <select id="SymbolListingForSelection" size="20" style="width: 90%;"
@@ -53,10 +92,16 @@
                 <table id="ConnectionTable" border="1" style="border: 1px solid black;">
                 </table>
             </div>
-        </aside>
+        </div>
+        <div class="middle">
 
+            <canvas id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;">
+                Your browser does not support the HTML5 canvas tag.
+            </canvas>
 
-        <aside class="right-sidebar">
+        </div>
+        <div class="right">
+
             <div>
                 Layout ID:<input type="text" id="LayoutID" value=""><br>
                 Symbol ID:<input type="text" id="SymbolID" value=""><br>
@@ -65,30 +110,21 @@
                 X:<input type="text" id="SchematicX" value=""><br>
                 Y:<input type="text" id="SchematicY" value=""><br>
                 Rotation:<input type="text" size="3" id="SchematicRotation" value="">
-                <input type="button" value="Left" onclick="UIsymbolLayoutButtonClick('rotate left');">
-                <input type="button" value="Right" onclick="UIsymbolLayoutButtonClick('rotate right');">
+                <input type="button" value="<" onclick="UIsymbolLayoutButtonClick('rotate left');">
+                <input type="button" value=">" onclick="UIsymbolLayoutButtonClick('rotate right');">
                 <br>
 
                 <input type="button" value="Delete" onclick="UIsymbolLayoutButtonClick('delete');">
                 <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
 
             </div>
-        </aside>
+
+        </div>
     </div>
-
-<!-- .left-sidebar -->
-<!-- .right-sidebar -->
-
-
-<footer class="footer">
-
-
-    Schematic Creator (C) Michael Molinari 2018
-
-</footer><!-- .footer -->
+    <div class="footer">(c) 2017 Michael Molinari</div>
 </div>
 
-</html>
+
 
 <script src="engine.js"></script>
 <script>
