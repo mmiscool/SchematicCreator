@@ -339,8 +339,12 @@ function UIloadStoredLayout() {
         Symbols[x] = new CircuitSymbols();
 
         Symbols[x].extend(BrowserStorage("Symbol", x, "Layout"));
-        UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
-        Symbols[x].img.src = "../../../Storage/Symbols/" + x + '-Symbol.png';
+        if ( Symbols[x].Name !== "")
+        {
+            UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
+            Symbols[x].img.src = "../../../Storage/Symbols/" + x + '-Symbol.png';
+        }
+
 
     }
 

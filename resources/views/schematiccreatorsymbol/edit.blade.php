@@ -81,7 +81,7 @@
         </script>
 
         <iframe id='cad' src="../../../../../SchematicEditor/SymbolEditor.htm?id={!!$schematiccreatorsymbol->id!!}"
-                style="background:white"></iframe>
+                style="background:white ; width:99%;"></iframe>
 
     </section>
 @endsection
