@@ -114,7 +114,7 @@
         </script>
 
         <iframe id='cad' src=""
-                style="background:white"></iframe>
+                style="background:white; width:99%;"></iframe>
 
 
     </section>

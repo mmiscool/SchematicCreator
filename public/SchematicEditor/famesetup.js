@@ -5,6 +5,6 @@ $(window).on('resize', SetIframeSize);
 
 
 function SetIframeSize() {
-    $("#cad").width($(window).width() - 275); // added margin for scrollbars
+    //$("#cad").width($("#accordion").width() -20); // added margin for scrollbars
     $("#cad").height($(window).height() - 150);
 }

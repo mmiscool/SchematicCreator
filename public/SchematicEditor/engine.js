@@ -17,6 +17,7 @@ function UIsetCurrentToolStatus(mystatus) {
     CurrentToolStatus = mystatus;
     document.getElementById("CurrentToolStatus").value = CurrentToolStatus;
 }
+
 UIsetCurrentToolStatus("");
 
 var SchematicID = new URL(window.location.href).searchParams.get("id");
@@ -159,6 +160,11 @@ function CircuitLayout() {
     this.moveSymbol = function (x, y) {
         this.SchematicX = parseInt(x);
         this.SchematicY = parseInt(y);
+    };
+
+    this.moveSymbolRelative = function (x, y) {
+        this.SchematicX += parseInt(x);
+        this.SchematicY += parseInt(y);
     };
 
     this.DetectIfSymbolUnderXY = function (x, y) {
@@ -367,11 +373,6 @@ function UIsaveStoredLayout() {
 UIloadStoredLayout();
 
 
-
-
-
-
-
 function UIMouseWheelHandler(e) {
     context.setTransform(1, 0, 0, 1, 0, 0);
     // cross-browser wheel delta
@@ -406,6 +407,15 @@ function getMousePos(canvas, evt) {
 
 var canvas = document.getElementById('myCanvas');
 
+
+canvas.addEventListener("keypres", doKeyDown, true);
+
+function doKeyDown(e) {
+
+    alert(e.keyCode)
+
+}
+
 canvas.addEventListener('mousewheel', UIMouseWheelHandler);
 var context = canvas.getContext('2d');
 context.scale(UIscale, UIscale);
@@ -427,36 +437,65 @@ canvas.addEventListener('mousedown', function (evt) {
 });
 
 
-document.onwheel = function(){ return false; };
+document.onwheel = function () {
+    return false;
+};
 
 canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
 
+    UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+    UIshowSymbolLayoutInfo(UIselectedSymbolID);
+
+    //exit current command on right click
     if (evt.button === 2) UIsetCurrentToolStatus("");
 
     if (detextifdrag.x != mousePos.x && detextifdrag.y != mousePos.y) {
-        UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
-        UIsetCurrentToolStatus("moveSymbol");
+        UIdragDetect = true;
+
+        bla = CheckLayoutSymbolPinClick(detextifdrag.x, detextifdrag.y);
+        if (bla !== CheckLayoutSymbolPinClick(detextifdrag.x, detextifdrag.y) && CheckLayoutSymbolPinClick(mousePos.x, mousePos.y)) {
+            UIaddConnectionButtonClick();
+            Connections[UIselectedConnectionID].id1 = bla.id;
+            Connections[UIselectedConnectionID].pin1 = bla.pin;
+            CurrentToolStatus = "addConnection";
+
+
+        }
+        else {
+            UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
+            UIsetCurrentToolStatus("moveSymbol");
+            detextifdrag.x = mousePos.x - detextifdrag.x;
+            detextifdrag.y = mousePos.y - detextifdrag.y;
+
+        }
+
+
     }
 
     console.log(CheckLayoutSymbolPinClick(mousePos.x, mousePos.y));
     console.log(CheckLayoutSymbolClick(mousePos.x, mousePos.y));
 
 
-    if (CurrentToolStatus === "symbolPic") {
-        UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
-        UIshowSymbolLayoutInfo(UIselectedSymbolID);
-        //CheckLayoutSymbolClick(mousePos.x, mousePos.y);
-    }
+
+
 
 
     if (CurrentToolStatus === "moveSymbol") {
         //UIselectedSymbolID = document.getElementById("LayoutID").value;
         if (Layout[UIselectedSymbolID] !== undefined) {
-            Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
+
+            if (UIdragDetect = true) {
+                //put code here to move symbol relative to click position and not center point.
+                Layout[UIselectedSymbolID].moveSymbolRelative(detextifdrag.x, detextifdrag.y)
+            }
+            else {
+                Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y)
+            }
+
             UIshowSymbolLayoutInfo(UIselectedSymbolID);
-            UIsetCurrentToolStatus( "symbolPic");
+            UIsetCurrentToolStatus("symbolPic");
         }
 
     }
@@ -708,9 +747,6 @@ function renderLayout() {
 }
 
 
-
-
-
 function BrowserStorageStore(type, id, field, contents) {
     localStorage.setItem(type + "-" + id + "-" + field, contents);
 }
@@ -724,12 +760,12 @@ function BrowserStorage(type, id, field) {
 }
 
 
-
 function UIaddItemToSelect(id, optionToAdd, value) {
     var option = document.createElement("option");
     if (optionToAdd === "") return;
     option.text = optionToAdd;
-    option.value = value
+    option.value = value;
+    option.style.backgroundImage="../../../../../../storage/symbols/21-Symbol.png">
     document.getElementById(id).add(option);
 }
 

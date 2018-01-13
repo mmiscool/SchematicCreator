@@ -12,9 +12,8 @@
     </div>
     <div class="main">
         <div class="left">
-            <button value="Add Symbol" onclick="UIaddSymbolButtonClick();"><i class="fa fa-plus-square" aria-hidden="true"></i></button>
-            <input type="button" value="Add Connection" onclick="UIaddConnectionButtonClick();">
-            <select id="SymbolListingForSelection" size="20" style="width: 90%;"
+
+            <select id="SymbolListingForSelection" size="20" style="width: 100%;"
                     onclick="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
 
             </select>
@@ -39,12 +38,12 @@
         <div class="right">
 
             <div>
-                Layout ID:<input type="text" id="LayoutID" value=""><br>
-                Symbol ID:<input type="text" id="SymbolID" value=""><br>
+                Layout ID:<input type="text" size="5" id="LayoutID" value=""><br>
+                Symbol ID:<input type="text" size="5" id="SymbolID" value=""><br>
                 Reference Designator:<input type="text" id="ReferenceDesignator" value=""><br>
 
-                X:<input type="text" id="SchematicX" value=""><br>
-                Y:<input type="text" id="SchematicY" value=""><br>
+                X:<input type="text" size="5" id="SchematicX" value=""><br>
+                Y:<input type="text" size="5" id="SchematicY" value=""><br>
                 Rotation:<input type="text" size="3" id="SchematicRotation" value="">
                 <button value="<" onclick="UIsymbolLayoutButtonClick('rotate left');"><i class="fa fa-undo" aria-hidden="true"></i> </button>
                 <button value=">" onclick="UIsymbolLayoutButtonClick('rotate right');"> <i class="fa fa-repeat" aria-hidden="true"></i></button>
