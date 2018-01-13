@@ -7,6 +7,10 @@ var UIselectedSymbolID;
 var UIselectedConnectionID;
 var UIscale = .5;
 
+var UISelectedLinePoint;
+
+
+resolution = 20;
 
 Connections = [];
 Symbols = [];
@@ -70,7 +74,6 @@ function CircuitConnections() {
     this.jogged = "";
     this.jogPosition = 0;
     this.linePoints = [];
-    this.linePoints.push(new Point());
 
 
     console.log(this.linePoints);
@@ -96,7 +99,8 @@ function CircuitConnections() {
     };
 
 
-    this.DrawMe = function (collor) {
+    this.DrawMe = function (collor, mypoint) {
+        if (collor === "undefined") collor = "black";
         if (this.id2 === 0) return;
         console.log(this.pin1);
         bla = Layout[this.id1].GivePointForPinID(this.pin1);
@@ -104,21 +108,43 @@ function CircuitConnections() {
 
         if (Layout[this.id1].GivePointForPinID(this.pin1) === undefined || Layout[this.id2].GivePointForPinID(this.pin2) === undefined) return;
 
-        if (collor != undefined) {
-            UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2), collor)
-        }
-        else {
-            UIdrawLine(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2))
-        }
+        olditem = new Point();
+        olditem = Layout[this.id1].GivePointForPinID(this.pin1);
 
+        //draw all points of the line
+        pointClicked = false;
 
-        return "Drew the line";
+        this.linePoints.forEach(function (item, index) {
+
+            if (mypoint) {
+                mypoint.check = true;
+                if (DetectIfPointClicked(mypoint, item)){
+                    pointClicked = index;
+                    alert(index);
+                }
+            }
+
+            item.collor = "blue";
+            UIdrawPin(item);
+            UIdrawLine(olditem, item, collor);
+            olditem = item;
+
+        });
+
+        UIdrawLine(olditem, Layout[this.id2].GivePointForPinID(this.pin2), collor);
+        return pointClicked;
+
     };
 
     this.Select = function (bla) {
         UIselectedConnectionID = bla;
         renderLayout();
         this.DrawMe("red");
+        CurrentToolStatus = "AddLinePoint";
+    };
+
+    this.AddLinePoin = function (mypoint) {
+        this.linePoints.push(mypoint);
     };
 
 
@@ -214,7 +240,7 @@ function CircuitLayout() {
 
         if (this.SymbolID <= 0) return;
         UIeditMode = "Symbol";
-        resolution = 20;
+
 
         pins = this.PinsListObject();
 
@@ -227,10 +253,7 @@ function CircuitLayout() {
                 console.log(checkIfPointClickedHack, myTempppOint)
 
 
-                if (
-                    Number(checkIfPointClickedHack.x) <= myTempppOint.x + resolution && Number(checkIfPointClickedHack.x) >= myTempppOint.x - resolution &&
-                    Number(checkIfPointClickedHack.y) <= myTempppOint.y + resolution && Number(checkIfPointClickedHack.y) >= myTempppOint.y - resolution
-                ) {
+                if (DetectIfPointClicked(checkIfPointClickedHack, myTempppOint)) {
 
                     console.log(this.SchematicSymbolPoint(pins[i].name));
                     return this.SchematicSymbolPoint(pins[i].name);
@@ -339,8 +362,7 @@ function UIloadStoredLayout() {
         Symbols[x] = new CircuitSymbols();
 
         Symbols[x].extend(BrowserStorage("Symbol", x, "Layout"));
-        if ( Symbols[x].Name !== "")
-        {
+        if (Symbols[x].Name !== "") {
             UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
             Symbols[x].img.src = "../../../Storage/Symbols/" + x + '-Symbol.png';
         }
@@ -353,6 +375,8 @@ function UIloadStoredLayout() {
         console.log(Connections[x].linePoints);
 
         Connections[x].extend(BrowserStorage("Schematic", x, "Connection"));
+        blabla = new Point();
+
     }
 
     for (x = 1; x <= MaxLayout; x++) {
@@ -375,6 +399,21 @@ function UIsaveStoredLayout() {
 
 
 UIloadStoredLayout();
+
+
+function DetectIfPointClicked(pontA, pointB) {
+    if (
+        Number(pontA.x) <= pointB.x + resolution && Number(pontA.x) >= pointB.x - resolution &&
+        Number(pontA.y) <= pointB.y + resolution && Number(pontA.y) >= pointB.y - resolution
+
+    ) {
+        return true;
+    }
+    else {
+        return false;
+    }
+
+}
 
 
 function UIMouseWheelHandler(e) {
@@ -444,10 +483,12 @@ canvas.addEventListener('mousedown', function (evt) {
 document.onwheel = function () {
     return false;
 };
-
+var mousePos;
 canvas.addEventListener('mouseup', function (evt) {
-    var mousePos = getMousePos(canvas, evt);
+
+    mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
+
 
     UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
     UIshowSymbolLayoutInfo(UIselectedSymbolID);
@@ -455,11 +496,11 @@ canvas.addEventListener('mouseup', function (evt) {
     //exit current command on right click
     if (evt.button === 2) UIsetCurrentToolStatus("");
 
-    if (detextifdrag.x != mousePos.x && detextifdrag.y != mousePos.y) {
+    if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
         UIdragDetect = true;
 
-        bla = CheckLayoutSymbolPinClick(detextifdrag.x, detextifdrag.y);
-        if (bla !== CheckLayoutSymbolPinClick(detextifdrag.x, detextifdrag.y) && CheckLayoutSymbolPinClick(mousePos.x, mousePos.y)) {
+        bla = CheckLayoutSymbolPinClick(detextifdrag);
+        if (bla !== CheckLayoutSymbolPinClick(detextifdrag) && CheckLayoutSymbolPinClick(mousePos)) {
             UIaddConnectionButtonClick();
             Connections[UIselectedConnectionID].id1 = bla.id;
             Connections[UIselectedConnectionID].pin1 = bla.pin;
@@ -478,12 +519,14 @@ canvas.addEventListener('mouseup', function (evt) {
 
     }
 
-    console.log(CheckLayoutSymbolPinClick(mousePos.x, mousePos.y));
-    console.log(CheckLayoutSymbolClick(mousePos.x, mousePos.y));
+
+    if (CurrentToolStatus === "AddLinePoint") {
+        Connections[UIselectedConnectionID].AddLinePoin(mousePos)
+    }
 
 
-
-
+    console.log(CheckLayoutSymbolPinClick(mousePos));
+    console.log(CheckLayoutSymbolClick(mousePos));
 
 
     if (CurrentToolStatus === "moveSymbol") {
@@ -534,7 +577,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
     if (CurrentToolStatus === "addConnection") {
         if (Connections[UIselectedConnectionID].id1 === 0) {
-            bla = CheckLayoutSymbolPinClick(mousePos.x, mousePos.y);
+            bla = CheckLayoutSymbolPinClick(mousePos);
             if (bla) {
                 Connections[UIselectedConnectionID].id1 = bla.id;
                 Connections[UIselectedConnectionID].pin1 = bla.pin;
@@ -544,7 +587,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
         } else if (Connections[UIselectedConnectionID].id2 === 0) {
 
-            bla = CheckLayoutSymbolPinClick(mousePos.x, mousePos.y);
+            bla = CheckLayoutSymbolPinClick(mousePos);
             console.log(Connections[UIselectedConnectionID].id1, bla.id, Connections[UIselectedConnectionID].pin1, bla.pin);
             if (Connections[UIselectedConnectionID].id1 == bla.id && Connections[UIselectedConnectionID].pin1 == bla.pin) {
                 renderLayout();
@@ -566,7 +609,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
     }
 
-
+    
     renderLayout();
 }, false);
 
@@ -667,11 +710,8 @@ function CheckLayoutSymbolClick(x, y) {
     return 0;
 }
 
-function CheckLayoutSymbolPinClick(x, y) {
+function CheckLayoutSymbolPinClick(CheckLayoutSymbolPinClickMyPoint) {
 
-    CheckLayoutSymbolPinClickMyPoint = new Point();
-    CheckLayoutSymbolPinClickMyPoint.x = x;
-    CheckLayoutSymbolPinClickMyPoint.y = y;
     CheckLayoutSymbolPinClickMyPoint.check = true;
 
     myReturn = new Object();
@@ -689,7 +729,7 @@ function CheckLayoutSymbolPinClick(x, y) {
 
 
 function UIdrawPin(point) {
-    if (!point.x) ;
+    if (!point.x) return;
     context.beginPath();
     context.arc(point.x, point.y, 20, 0, 2 * Math.PI, false);
     context.fillStyle = point.collor;
@@ -701,10 +741,10 @@ function UIdrawLine(point1, point2, collor) {
 
     context.lineWidth = 10;
     context.beginPath();
-    if (collor != undefined) {
-        context.strokeStyle = '#ff0000';
-    } else {
+    if (!collor) {
         context.strokeStyle = "black";
+    } else {
+        context.strokeStyle = collor;
     }
     context.moveTo(Number(point1.x), Number(point1.y));
     context.lineTo(Number(point2.x), Number(point2.y));
@@ -734,6 +774,7 @@ function drawRotatedImage(image, x, y, angle) {
 }
 
 function renderLayout() {
+
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (x = 1; x <= MaxLayout; x++) {
         Layout[x].RenderLayoutItem();
@@ -743,7 +784,11 @@ function renderLayout() {
 
     for (x = 1; x <= MaxConnections; x++) {
         //console.log(Connections[x]);
-        Connections[x].DrawMe();
+        console.log(Connections[x].DrawMe("black", mousePos));
+        if (Connections[x].DrawMe("black", mousePos)!== false) {
+            Connections[x].DrawMe("red");
+            UIselectedConnectionID = x;
+        }
     }
     UIdisplayConnectionTable();
     UIdisplayDevicesTable();
@@ -769,8 +814,8 @@ function UIaddItemToSelect(id, optionToAdd, value) {
     if (optionToAdd === "") return;
     option.text = optionToAdd;
     option.value = value;
-    option.style.backgroundImage="../../../../../../storage/symbols/21-Symbol.png">
-    document.getElementById(id).add(option);
+    option.style.backgroundImage = "../../../../../../storage/symbols/21-Symbol.png" >
+        document.getElementById(id).add(option);
 }
 
 function UIexportImage() {

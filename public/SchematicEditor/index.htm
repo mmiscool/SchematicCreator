@@ -12,20 +12,24 @@
     </div>
     <div class="main">
         <div class="left">
+            <div style ="   height:40%; overflow: auto;">
+                <select id="SymbolListingForSelection" size="5" style="width: 100%;"
+                                     onclick="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
 
-            <select id="SymbolListingForSelection" size="20" style="width: 100%;"
-                    onclick="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
-
-            </select>
-            <div style="overflow: auto; height: 100px; border: black">
-                <img id="SymbolPreviewImage" src="none.png" style="width:100px">
+                </select>
+                <div style="overflow: auto; height: 100px; border: black">
+                    <img id="SymbolPreviewImage" src="none.png" style="width:100px">
+                </div>
             </div>
 
 
-            <div style="overflow: auto; height: 300px; border: black">
+            <div style ="   height:40%; overflow: auto;">
+
+
                 <table id="ConnectionTable" border="1" style="border: 1px solid black;;font-size: .75em;">
                 </table>
             </div>
+
 
         </div>
         <div class="middle">
@@ -40,11 +44,12 @@
             <div>
                 Layout ID:<input type="text" size="5" id="LayoutID" value=""><br>
                 Symbol ID:<input type="text" size="5" id="SymbolID" value=""><br>
-                Reference Designator:<input type="text" size="5" id="ReferenceDesignator" value=""><br>
+                Reference Designator: <input type="text" size="5" id="ReferenceDesignator" value=""><br>
 
                 X:<input type="text" size="5" id="SchematicX" value=""><br>
                 Y:<input type="text" size="5" id="SchematicY" value=""><br>
-                Rotation:<input type="text" size="3" id="SchematicRotation" value="">
+                Rotation:<br>
+                <input type="text" size="3" id="SchematicRotation" value="">
                 <button value="<" onclick="UIsymbolLayoutButtonClick('rotate left');"><i class="fa fa-undo" aria-hidden="true"></i> </button>
                 <button value=">" onclick="UIsymbolLayoutButtonClick('rotate right');"> <i class="fa fa-repeat" aria-hidden="true"></i></button>
                 <br>
