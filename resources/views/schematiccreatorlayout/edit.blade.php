@@ -47,6 +47,10 @@
             </div>
         </div>
 
+
+        <iframe id='cad' src="../../../../../../schematiccreatorsymbol"
+                style="background:white; width:99%;"></iframe>
+
         <script>
 
             reading = 0;
@@ -106,15 +110,21 @@
                 reading = 0;
             }
 
-            window.addEventListener("load", function(){
-                readSingleFile();
-                document.getElementById('cad').src = "../../../../../SchematicEditor/?id={!!$schematiccreatorlayout->id!!}";
-            });
+
+            document.getElementById('cad').onload = function() {
+
+                window.addEventListener("load", function(){
+                    readSingleFile();
+                    document.getElementById('cad').src = "../../../../../SchematicEditor/?id={!!$schematiccreatorlayout->id!!}";
+                });
+            };
+
+
+
+
 
         </script>
 
-        <iframe id='cad' src=""
-                style="background:white; width:99%;"></iframe>
 
 
     </section>
