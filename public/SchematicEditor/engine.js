@@ -822,7 +822,11 @@ function UIdisplayDevicesTable() {
 
             row.insertCell(1).innerHTML = x;
             row.insertCell(2).innerHTML = Layout[x].ReferenceDesignator;
-            if (UIselectedSymbolID === x) row.style.backgroundColor = "red";
+            if (UIselectedSymbolID === x) {
+                row.style.backgroundColor = "red";
+                row.scrollIntoView(false);
+
+            }
         }
 
     }
@@ -874,7 +878,10 @@ function UIdisplayConnectionTable() {
             row.insertCell(5).innerHTML = Connections[x].jogged;
             row.insertCell(6).innerHTML = Connections[x].jogPosition;
 
-            if (UIselectedConnectionID === x) row.style.backgroundColor = "red";
+            if (UIselectedConnectionID === x) {
+                row.style.backgroundColor = "red";
+                row.scrollIntoView(false);
+            }
         }
 
     }
