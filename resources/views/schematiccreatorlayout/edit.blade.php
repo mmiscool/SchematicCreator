@@ -108,12 +108,12 @@
 
             window.addEventListener("load", function(){
                 readSingleFile();
-                document.getElementById('cad').contentWindow.location.reload();
+                document.getElementById('cad').src = "../../../../../SchematicEditor/?id={!!$schematiccreatorlayout->id!!}";
             });
 
         </script>
 
-        <iframe id='cad' src="../../../../../SchematicEditor/?id={!!$schematiccreatorlayout->id!!}"
+        <iframe id='cad' src=""
                 style="background:white"></iframe>
 
 

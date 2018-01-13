@@ -7,6 +7,18 @@ var UIselectedSymbolID;
 var UIselectedConnectionID;
 var UIscale = .5;
 
+
+Connections = [];
+Symbols = [];
+Layout = [];
+
+
+function UIsetCurrentToolStatus(mystatus) {
+    CurrentToolStatus = mystatus;
+    document.getElementById("CurrentToolStatus").value = CurrentToolStatus;
+}
+UIsetCurrentToolStatus("");
+
 var SchematicID = new URL(window.location.href).searchParams.get("id");
 
 
@@ -30,6 +42,7 @@ function CircuitSymbols() {
         this.Points = "";
         this.width = 0;
         this.height = 0;
+        this.img = new Image();
         return "deleted";
     };
 
@@ -49,6 +62,18 @@ function CircuitSymbols() {
 
 
 function CircuitConnections() {
+    this.id1 = 0;
+    this.pin1 = "";
+    this.id2 = 0;
+    this.pin2 = "";
+    this.jogged = "";
+    this.jogPosition = 0;
+    this.linePoints = [];
+    this.linePoints.push(new Point());
+
+
+    console.log(this.linePoints);
+
 
     this.delete = function () {
         this.id1 = 0;
@@ -57,7 +82,9 @@ function CircuitConnections() {
         this.pin2 = "";
         this.jogged = "";
         this.jogPosition = 0;
-        this.linePoints = [] ;
+        this.linePoints = [];
+
+
         return "deleted";
     };
 
@@ -171,9 +198,8 @@ function CircuitLayout() {
 
     this.RenderLayoutItem = function () {
         if (this.SymbolID <= 0) return;
-        var img = new Image();
-        img.src = '../../../Storage/Symbols/' + this.SymbolID + '-Symbol.png';
-        drawRotatedImage(img, this.SchematicX, this.SchematicY, this.SchematicRotation);
+
+        drawRotatedImage(Symbols[this.SymbolID].img, this.SchematicX, this.SchematicY, this.SchematicRotation);
     };
 
 
@@ -297,9 +323,6 @@ function CircuitLayout() {
 
 
 // Create arraays to hold the objects for digram
-var Connections = [];
-var Symbols = [];
-var Layout = [];
 
 
 //Populate arraies with empty data
@@ -308,12 +331,17 @@ function UIloadStoredLayout() {
 
     for (x = 1; x <= MaxSymbols; x++) {
         Symbols[x] = new CircuitSymbols();
+
         Symbols[x].extend(BrowserStorage("Symbol", x, "Layout"));
         UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
+        Symbols[x].img.src = "../../../Storage/Symbols/" + x + '-Symbol.png';
+
     }
 
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x] = new CircuitConnections();
+        console.log(Connections[x].linePoints);
+
         Connections[x].extend(BrowserStorage("Schematic", x, "Connection"));
     }
 
@@ -339,7 +367,10 @@ function UIsaveStoredLayout() {
 UIloadStoredLayout();
 
 
-window.onwheel = function(){ return false; };
+
+
+
+
 
 function UIMouseWheelHandler(e) {
     context.setTransform(1, 0, 0, 1, 0, 0);
@@ -348,22 +379,19 @@ function UIMouseWheelHandler(e) {
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
     UIscale += .1 * delta;
-    if(UIscale <.1)UIscale =.1;
-    if(UIscale >1.5)UIscale =1.5;
-    context.scale(UIscale ,UIscale  );
+    if (UIscale < .1) UIscale = .1;
+    if (UIscale > 1.5) UIscale = 1.5;
+    context.scale(UIscale, UIscale);
     renderLayout();
     document.getElementById("zoom").value = UIscale;
     return false;
 }
 
 
-
-
-function UIupdateZoom()
-{
+function UIupdateZoom() {
     context.setTransform(1, 0, 0, 1, 0, 0);
-    UIscale =document.getElementById("zoom").value;
-    context.scale(UIscale ,UIscale  );
+    UIscale = document.getElementById("zoom").value;
+    context.scale(UIscale, UIscale);
     renderLayout();
 }
 
@@ -371,15 +399,16 @@ function UIupdateZoom()
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
-        x: (evt.clientX - rect.left) / UIscale ,
+        x: (evt.clientX - rect.left) / UIscale,
         y: (evt.clientY - rect.top) / UIscale
     };
 }
 
 var canvas = document.getElementById('myCanvas');
+
 canvas.addEventListener('mousewheel', UIMouseWheelHandler);
 var context = canvas.getContext('2d');
-context.scale(UIscale ,UIscale  );
+context.scale(UIscale, UIscale);
 canvas.addEventListener('contextmenu', function (e) {
     if (e.button === 2) {
         e.preventDefault();
@@ -398,18 +427,22 @@ canvas.addEventListener('mousedown', function (evt) {
 });
 
 
+document.onwheel = function(){ return false; };
+
 canvas.addEventListener('mouseup', function (evt) {
     var mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
+
+    if (evt.button === 2) UIsetCurrentToolStatus("");
+
     if (detextifdrag.x != mousePos.x && detextifdrag.y != mousePos.y) {
         UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
-        CurrentToolStatus = "moveSymbol";
+        UIsetCurrentToolStatus("moveSymbol");
     }
 
     console.log(CheckLayoutSymbolPinClick(mousePos.x, mousePos.y));
     console.log(CheckLayoutSymbolClick(mousePos.x, mousePos.y));
 
-    //if (evt.button === 2 && UIselectedSymbolID) CurrentToolStatus = "moveSymbol";
 
     if (CurrentToolStatus === "symbolPic") {
         UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
@@ -423,7 +456,7 @@ canvas.addEventListener('mouseup', function (evt) {
         if (Layout[UIselectedSymbolID] !== undefined) {
             Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
             UIshowSymbolLayoutInfo(UIselectedSymbolID);
-            CurrentToolStatus = "symbolPic";
+            UIsetCurrentToolStatus( "symbolPic");
         }
 
     }
@@ -443,7 +476,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
                 Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
                 UIshowSymbolLayoutInfo(UIselectedSymbolID);
-                CurrentToolStatus = "symbolPic";
+                UIsetCurrentToolStatus("symbolPic");
 
                 break;
             }
@@ -452,7 +485,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
 
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
-        CurrentToolStatus = "symbolPic";
+        UIsetCurrentToolStatus("symbolPic");
     }
 
 
@@ -483,7 +516,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
         if (Connections[UIselectedConnectionID].id1 && Connections[UIselectedConnectionID].id2) {
             //alert("Connection Created");
-            CurrentToolStatus = "symbolPic";
+            UIsetCurrentToolStatus("symbolPic");
             renderLayout();
         }
 
@@ -494,10 +527,18 @@ canvas.addEventListener('mouseup', function (evt) {
     renderLayout();
 }, false);
 
+var UIsymbolToAdd = "";
+
+function UISymbolAdderSelectClick(thing) {
+    UIsymbolToAdd = thing;
+    document.getElementById('SymbolPreviewImage').src = "../../../Storage/Symbols/" + UIsymbolToAdd + '-Symbol.png';
+    UIaddSymbolButtonClick();
+}
+
 
 function UIaddSymbolButtonClick() {
     if (UIsymbolToAdd != "") {
-        CurrentToolStatus = "addSymbol";
+        UIsetCurrentToolStatus("addSymbol");
     }
     else {
         alert("You must select a symbol");
@@ -508,7 +549,7 @@ function UIaddSymbolButtonClick() {
 function UIaddConnectionButtonClick() {
     for (x = 1; x <= MaxConnections; x++) {
         if (Connections[x].id1 === 0) {
-            CurrentToolStatus = "addConnection";
+            UIsetCurrentToolStatus("addConnection");
             UIselectedConnectionID = x;
             break;
         }
@@ -548,7 +589,7 @@ function UIsymbolLayoutButtonClick(ActionToBeTaken) {
 
 
     if (ActionToBeTaken == "move") {
-        CurrentToolStatus = "moveSymbol";
+        UIsetCurrentToolStatus("moveSymbol");
     }
 
     if (ActionToBeTaken == "apply") {
@@ -667,7 +708,7 @@ function renderLayout() {
 }
 
 
-renderLayout();
+
 
 
 function BrowserStorageStore(type, id, field, contents) {
@@ -682,12 +723,7 @@ function BrowserStorage(type, id, field) {
     return "";
 }
 
-var UIsymbolToAdd = "";
 
-function UISymbolAdderSelectClick(thing) {
-    UIsymbolToAdd = thing;
-    document.getElementById('SymbolPreviewImage').src = "../../../Storage/Symbols/" + UIsymbolToAdd + '-Symbol.png';
-}
 
 function UIaddItemToSelect(id, optionToAdd, value) {
     var option = document.createElement("option");
@@ -722,7 +758,6 @@ function UIdisplayDevicesTable() {
     row.insertCell(2).innerHTML = "Ref Designator";
 
 
-
     for (x = 1; x <= MaxLayout; x++) {
 
         if (Layout[x].SymbolID) {
@@ -747,14 +782,13 @@ function UIdisplayDevicesTable() {
 
             row.insertCell(1).innerHTML = x;
             row.insertCell(2).innerHTML = Layout[x].ReferenceDesignator;
-            if( UIselectedSymbolID === x) row.style.backgroundColor = "red" ;
+            if (UIselectedSymbolID === x) row.style.backgroundColor = "red";
         }
 
     }
 
 
 }
-
 
 
 function UIdisplayConnectionTable() {
@@ -800,10 +834,12 @@ function UIdisplayConnectionTable() {
             row.insertCell(5).innerHTML = Connections[x].jogged;
             row.insertCell(6).innerHTML = Connections[x].jogPosition;
 
-            if( UIselectedConnectionID === x) row.style.backgroundColor = "red" ;
+            if (UIselectedConnectionID === x) row.style.backgroundColor = "red";
         }
 
     }
 
 
 }
+
+renderLayout();
