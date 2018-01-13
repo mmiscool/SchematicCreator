@@ -815,7 +815,7 @@ function UIdisplayDevicesTable() {
             var button = document.createElement("button");
             button.innerHTML = "Select";
             button.id = x;
-            button.setAttribute("onClick", "Layout[" + x + "].Select();");
+            button.setAttribute("onClick", "UIselectedSymbolID =" + x + "; UIshowSymbolLayoutInfo(UIselectedSymbolID) ;");
             bla.appendChild(button);
             row.insertCell(0).appendChild(bla);
 
