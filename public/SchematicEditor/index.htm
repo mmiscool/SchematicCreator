@@ -1,23 +1,37 @@
-
 <link rel="stylesheet" href="./font-awesome/css/font-awesome.min.css">
 <link rel="stylesheet" href="./style.css">
 
 
 <div class="full-screen">
     <div class="header">
-        <a href="SymbolEditor.htm">Symbol Editor</a>
-        <button value="Save" onclick="UIsaveStoredLayout();"> <i class="fa fa-floppy-o" aria-hidden="true"></i></button>
-        <input type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()" value=".5">
-        <button value="Generate Nets" id="GenNets" onclick="UIgenerateNetList();" >Generate Nets</button>
+        <button value="Save" onclick="UIsaveStoredLayout();"><i class="fa fa-floppy-o" aria-hidden="true"></i></button>
 
-        <button value="Add. Point" id="addPoint" onclick="UIsetCurrentToolStatus('AddLinePoint');" style="display:none;">Add Point</button>
+        <select id="AplicationModeSetting" size="1" onchange="UIsetAplicationModeSetting()">>
+            <option>Schematic</option>
+            <option>Board Layout</option>
+        </select>
+
+        <input name="Schematic" type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()" value=".5">
+        <button value="Generate Nets" id="GenNets" onclick="UIgenerateNetList();">Generate Nets</button>
+
+
+
+        <button name="Schematic" value="Add. Point" id="addPoint" onclick="UIsetCurrentToolStatus('AddLinePoint');"
+                style="display:none;">Add Point
+        </button>
+
+        <button name="Board Layout" value="CheckBoxes" id="CheckBoxes" onclick="UIBoarLayoutEngineCheckOverlaps();">
+            Check Boxes
+        </button>
+
+
 
     </div>
     <div class="main">
         <div class="left">
-            <div style ="   height:40%; overflow: auto;">
+            <div name="Schematic" style="height:40%; overflow: auto;">
                 <select id="SymbolListingForSelection" size="5" style="width: 100%;"
-                                     onclick="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
+                        onclick="UISymbolAdderSelectClick(this.options[this.selectedIndex].value);">
 
                 </select>
                 <div style="overflow: auto; height: 100px; border: black">
@@ -26,7 +40,7 @@
             </div>
 
 
-            <div style ="   height:40%; overflow: auto;">
+            <div style="height:40%; overflow: auto;">
 
 
                 <table id="ConnectionTable" border="1" style="border: 1px solid black;;font-size: .75em;">
@@ -37,14 +51,16 @@
         </div>
         <div class="middle">
 
-            <canvas id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;">
+            <canvas name="Schematic" id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;">
                 Your browser does not support the HTML5 canvas tag.
             </canvas>
+
+            <canvas name="Board Layout" id="canvas2" width="5000" height="5000" style="width:5000px;height:5000px;"></canvas>
 
         </div>
         <div class="right">
 
-            <div>
+            <div name="Schematic" >
                 Layout ID:<input type="text" size="5" id="LayoutID" value=""><br>
                 Symbol ID:<input type="text" size="5" id="SymbolID" value=""><br>
                 Reference Designator: <input type="text" size="5" id="ReferenceDesignator" value=""><br>
@@ -53,11 +69,17 @@
                 Y:<input type="text" size="5" id="SchematicY" value=""><br>
                 Rotation:<br>
                 <input type="text" size="3" id="SchematicRotation" value="">
-                <button value="<" onclick="UIsymbolLayoutButtonClick('rotate left');"><i class="fa fa-undo" aria-hidden="true"></i> </button>
-                <button value=">" onclick="UIsymbolLayoutButtonClick('rotate right');"> <i class="fa fa-repeat" aria-hidden="true"></i></button>
+                <button value="<" onclick="UIsymbolLayoutButtonClick('rotate left');"><i class="fa fa-undo"
+                                                                                         aria-hidden="true"></i>
+                </button>
+                <button value=">" onclick="UIsymbolLayoutButtonClick('rotate right');"><i class="fa fa-repeat"
+                                                                                          aria-hidden="true"></i>
+                </button>
                 <br>
 
-                <button value="Delete" onclick="UIsymbolLayoutButtonClick('delete');"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                <button value="Delete" onclick="UIsymbolLayoutButtonClick('delete');"><i class="fa fa-trash"
+                                                                                         aria-hidden="true"></i>
+                </button>
                 <input type="button" value="Apply" onclick="UIsymbolLayoutButtonClick('apply');">
 
             </div>
@@ -67,7 +89,8 @@
             </div>
         </div>
     </div>
-    <div class="footer">(c) 2017 Michael Molinari Cue: <input type="text" id="CurrentToolStatus" value=""> Selected Pin<input type="text" id="CurrentToolStatus" value=""></div>
+    <div class="footer">(c) 2017 Michael Molinari Cue: <input type="text" id="CurrentToolStatus" value=""> Selected
+        Pin<input type="text" id="CurrentToolStatus" value=""></div>
 </div>
 
 

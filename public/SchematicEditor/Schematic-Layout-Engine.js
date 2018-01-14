@@ -8,7 +8,7 @@ var UIselectedConnectionID;
 var UIscale = .5;
 
 var UISelectedLinePoint;
-
+var AplicationModeSetting = "Schematic";
 
 resolution = 20;
 
@@ -16,6 +16,33 @@ Connections = [];
 Symbols = [];
 Layout = [];
 
+
+function UIsetAplicationModeSetting()
+{
+    AplicationModeSetting =  document.getElementById("AplicationModeSetting").value;
+
+    if (AplicationModeSetting === "Schematic" ){
+        ScematicModeStyle = "";
+    }else {
+        ScematicModeStyle = "none";
+    }
+
+    if (AplicationModeSetting === "Board Layout" ){
+        BoardLayoutModeStyle = "";
+    }else {
+        BoardLayoutModeStyle = "none";
+    }
+
+    document.getElementsByName("Schematic").forEach(function (item){
+        item.style.display = ScematicModeStyle;
+    });
+
+    document.getElementsByName("Board Layout").forEach(function (item){
+        item.style.display = BoardLayoutModeStyle ;
+    });
+
+
+}
 
 function UIsetCurrentToolStatus(mystatus) {
     CurrentToolStatus = mystatus;
@@ -472,7 +499,10 @@ var canvas = document.getElementById('myCanvas');
 window.addEventListener("keydown", doKeyDown, true);
 
 function doKeyDown(e) {
-
+    if (AplicationModeSetting === "Board Layout")
+    {
+        UIboardLayoutEngineKeyboardPress(e.keyCode )
+    }
     //alert( e.keyCode );
     //detect escape key
     if (e.keyCode === 27) {
