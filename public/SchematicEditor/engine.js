@@ -101,10 +101,10 @@ function CircuitConnections() {
 
     this.DrawMe = function (collor, mypoint) {
         if (collor === "undefined") collor = "black";
-        if (this.id2 === 0) return;
-        console.log(this.pin1);
+        if (this.id2 === 0) return false;
+
         bla = Layout[this.id1].GivePointForPinID(this.pin1);
-        console.log(Layout[this.id1].GivePointForPinID(this.pin1), Layout[this.id2].GivePointForPinID(this.pin2));
+
 
         if (Layout[this.id1].GivePointForPinID(this.pin1) === undefined || Layout[this.id2].GivePointForPinID(this.pin2) === undefined) return;
 
@@ -118,9 +118,9 @@ function CircuitConnections() {
 
             if (mypoint) {
                 mypoint.check = true;
-                if (DetectIfPointClicked(mypoint, item)){
+                if (DetectIfPointClicked(mypoint, item)) {
                     pointClicked = index;
-                    alert(index);
+
                 }
             }
 
@@ -130,11 +130,12 @@ function CircuitConnections() {
             olditem = item;
 
         });
-
+        console.log(collor);
         UIdrawLine(olditem, Layout[this.id2].GivePointForPinID(this.pin2), collor);
         return pointClicked;
 
     };
+
 
     this.Select = function (bla) {
         UIselectedConnectionID = bla;
@@ -249,8 +250,6 @@ function CircuitLayout() {
             if (checkIfPointClickedHack != undefined) {
                 //console.log("my point" , checkIfPointClickedHack);
                 myTempppOint = this.SchematicSymbolPoint(pins[i]);
-
-                console.log(checkIfPointClickedHack, myTempppOint)
 
 
                 if (DetectIfPointClicked(checkIfPointClickedHack, myTempppOint)) {
@@ -451,11 +450,24 @@ function getMousePos(canvas, evt) {
 var canvas = document.getElementById('myCanvas');
 
 
-canvas.addEventListener("keypres", doKeyDown, true);
+window.addEventListener("keydown", doKeyDown, true);
 
 function doKeyDown(e) {
+    //detect escape key
+    alert( e.keyCode );
 
-    alert(e.keyCode)
+    if (e.keyCode  === 27) {
+        UIsetCurrentToolStatus("");
+        UIselectedSymbolID = undefined;
+        UIselectedConnectionID = undefined;
+    }
+
+    if (e.keyCode  === 46) {
+        UIsetCurrentToolStatus("");
+        Connections[UIselectedConnectionID].linePoints.splice(UISelectedLinePoint, 1);
+
+    }
+    renderLayout();
 
 }
 
@@ -485,19 +497,43 @@ document.onwheel = function () {
 };
 var mousePos;
 canvas.addEventListener('mouseup', function (evt) {
+    //exit current command on right click
+    if (evt.button === 2) UIsetCurrentToolStatus("");
 
     mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
 
+    mouseClickMidpointOnDrag = new Point();
+
+
+
+    if (CurrentToolStatus === "AddLinePoint") {
+        Connections[UIselectedConnectionID].AddLinePoin(mousePos)
+        UIsetCurrentToolStatus("");
+    }
+
 
     UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+    UIselectedConnectionID = CheckConnectionPointClick(mousePos);
+
     UIshowSymbolLayoutInfo(UIselectedSymbolID);
 
-    //exit current command on right click
-    if (evt.button === 2) UIsetCurrentToolStatus("");
+
 
     if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
         UIdragDetect = true;
+
+        mouseClickMidpointOnDrag.x = (detextifdrag.x + mousePos.x) /2 ;
+        mouseClickMidpointOnDrag.y = (detextifdrag.y + mousePos.y) /2 ;
+        console.log(mouseClickMidpointOnDrag);
+
+        UIselectedConnectionID = CheckConnectionPointClick(detextifdrag);
+
+        if (UIselectedConnectionID && UISelectedLinePoint !== false) {
+            Connections[UIselectedConnectionID].linePoints[UISelectedLinePoint] = mousePos;
+
+        }
+
 
         bla = CheckLayoutSymbolPinClick(detextifdrag);
         if (bla !== CheckLayoutSymbolPinClick(detextifdrag) && CheckLayoutSymbolPinClick(mousePos)) {
@@ -520,13 +556,7 @@ canvas.addEventListener('mouseup', function (evt) {
     }
 
 
-    if (CurrentToolStatus === "AddLinePoint") {
-        Connections[UIselectedConnectionID].AddLinePoin(mousePos)
-    }
 
-
-    console.log(CheckLayoutSymbolPinClick(mousePos));
-    console.log(CheckLayoutSymbolClick(mousePos));
 
 
     if (CurrentToolStatus === "moveSymbol") {
@@ -552,7 +582,7 @@ canvas.addEventListener('mouseup', function (evt) {
         UIselectedSymbolID = "";
 
         for (x = 1; x <= MaxLayout; x++) {
-            console.log(x + " " + Layout[x].SymbolID);
+
             if (Layout[x].SymbolID === 0) {
 
                 UIselectedSymbolID = x;
@@ -588,7 +618,6 @@ canvas.addEventListener('mouseup', function (evt) {
         } else if (Connections[UIselectedConnectionID].id2 === 0) {
 
             bla = CheckLayoutSymbolPinClick(mousePos);
-            console.log(Connections[UIselectedConnectionID].id1, bla.id, Connections[UIselectedConnectionID].pin1, bla.pin);
             if (Connections[UIselectedConnectionID].id1 == bla.id && Connections[UIselectedConnectionID].pin1 == bla.pin) {
                 renderLayout();
                 return;
@@ -596,12 +625,13 @@ canvas.addEventListener('mouseup', function (evt) {
             if (bla) {
                 Connections[UIselectedConnectionID].id2 = bla.id;
                 Connections[UIselectedConnectionID].pin2 = bla.pin;
+                Connections[UIselectedConnectionID].AddLinePoin(mouseClickMidpointOnDrag);
                 renderLayout();
             }
         }
 
         if (Connections[UIselectedConnectionID].id1 && Connections[UIselectedConnectionID].id2) {
-            //alert("Connection Created");
+
             UIsetCurrentToolStatus("symbolPic");
             renderLayout();
         }
@@ -609,7 +639,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
     }
 
-    
+
     renderLayout();
 }, false);
 
@@ -728,6 +758,20 @@ function CheckLayoutSymbolPinClick(CheckLayoutSymbolPinClickMyPoint) {
 }
 
 
+function CheckConnectionPointClick(myMousePos) {
+
+    returnvalue = undefined;
+    for (x = 1; x <= MaxConnections; x++) {
+        bla = Connections[x].DrawMe("black", myMousePos);
+        if (bla !== false) {
+            UISelectedLinePoint = bla;
+            returnvalue = x;
+            return returnvalue;
+        }
+    }
+    return false;
+}
+
 function UIdrawPin(point) {
     if (!point.x) return;
     context.beginPath();
@@ -783,11 +827,16 @@ function renderLayout() {
     }
 
     for (x = 1; x <= MaxConnections; x++) {
-        //console.log(Connections[x]);
-        console.log(Connections[x].DrawMe("black", mousePos));
-        if (Connections[x].DrawMe("black", mousePos)!== false) {
+
+
+        if (x === UIselectedConnectionID) {
+
             Connections[x].DrawMe("red");
-            UIselectedConnectionID = x;
+
+        }
+        else {
+
+            Connections[x].DrawMe("black");
         }
     }
     UIdisplayConnectionTable();
@@ -881,7 +930,7 @@ function UIdisplayDevicesTable() {
 
 
 function UIdisplayConnectionTable() {
-
+    document.getElementById("addPoint").style.display = "none";
     var table = document.getElementById("ConnectionTable");
     table.innerHTML = "";
     var row = table.insertRow(-1);
@@ -925,6 +974,7 @@ function UIdisplayConnectionTable() {
 
             if (UIselectedConnectionID === x) {
                 row.style.backgroundColor = "red";
+                document.getElementById("addPoint").style.display = "";
                 row.scrollIntoView(false);
             }
         }
