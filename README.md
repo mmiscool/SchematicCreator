@@ -21,15 +21,20 @@ This software is not production ready and has almost none of the required functi
   - Visualises the connnection as a line between the connected points
   - Allows creation of points on a connection to jog line arround other entitys
   - Displays data in table for each connection (symbol and pin IDs)
+- Net List
+  -Generate a net list from the componet list
+    - identifies points of the same potential
+    - ignores junctions from list
+    - stored as independant data structure and generated on demand.
 - PCB layout tool
   - data structures in place to hold symbol placement and orientation
   - No other devemloment has taken place yet.
   
   
 # Todo
-- Impliment netlist data capabilitys 
-  - Determin points of same potential from connection list
-  - Assign points of same potential a net ID
-  
 - PCB layout tool
+  - Add placement of pad layouts to grapics area
+  - Add overlapping object detection for pins.
+  - Add asigment and checking for net id to overlapping objects 
+  - Impliment save routine for board layout trace boxes.
   - EVERY THING !!!!!!!!!!
