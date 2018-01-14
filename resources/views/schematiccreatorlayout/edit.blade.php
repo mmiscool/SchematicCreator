@@ -40,7 +40,7 @@
                                 </textarea>
 
                             </div>
-                            <button class='btn btn-success' type='submit'><i class="fa fa-floppy-o"></i> Update</button>
+                            <button id="submitButton" class='btn btn-success' type='submit'><i class="fa fa-floppy-o"></i> Update</button>
                         </form>
                     </div>
                 </div>
@@ -62,6 +62,7 @@
                 if (reading == 1) return;
                 reading = 1;
                 var bla;
+                triggerSaveOnCompletion = false;
                 var lengthOfLocalStorage = localStorage.length;
                 bla = lengthOfLocalStorage.toString();
                 for (var i = 0, len = localStorage.length; i < len; i++) {
@@ -72,12 +73,15 @@
 
                         bla += "\n" + key + "\n" + value;
 
-
+                        triggerSaveOnCompletion = true;
                     }
 
                 }
                 document.getElementById('LayoutData').value = bla;
+                if(triggerSaveOnCompletion) document.getElementById('submitButton').click();
                 reading = 0;
+
+
             }
 
 

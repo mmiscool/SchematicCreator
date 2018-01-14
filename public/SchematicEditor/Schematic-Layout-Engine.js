@@ -73,6 +73,7 @@ function CircuitConnections() {
     this.pin2 = "";
     this.jogged = "";
     this.jogPosition = 0;
+    this.netID = undefined;
     this.linePoints = [];
 
 
@@ -91,6 +92,24 @@ function CircuitConnections() {
 
         return "deleted";
     };
+
+    this.netCheck = function (otherConnection) {
+
+        if (this.id1 === otherConnection.id1 && this.pin1 === otherConnection.pin1) return true;
+        if (this.id1 === otherConnection.id2 && this.pin1 === otherConnection.pin2) return true;
+
+
+        if (this.id2 === otherConnection.id1 && this.pin2 === otherConnection.pin1) return true;
+        if (this.id2 === otherConnection.id2 && this.pin2 === otherConnection.pin2) return true;
+
+        return false;
+    };
+
+    this.connected = function () {
+        if (this.id1 && this.id2) return true;
+        return false;
+    };
+
 
     this.remove = function () {
         //deletes the item and rerenders
@@ -453,17 +472,19 @@ var canvas = document.getElementById('myCanvas');
 window.addEventListener("keydown", doKeyDown, true);
 
 function doKeyDown(e) {
-    //detect escape key
-    alert( e.keyCode );
 
-    if (e.keyCode  === 27) {
+    //alert( e.keyCode );
+    //detect escape key
+    if (e.keyCode === 27) {
         UIsetCurrentToolStatus("");
         UIselectedSymbolID = undefined;
         UIselectedConnectionID = undefined;
     }
-
-    if (e.keyCode  === 46) {
+    //detect delete key
+    if (e.keyCode === 46) {
         UIsetCurrentToolStatus("");
+        if (Connections[UIselectedConnectionID].linePoints.length === 1) Connections[UIselectedConnectionID].delete();
+
         Connections[UIselectedConnectionID].linePoints.splice(UISelectedLinePoint, 1);
 
     }
@@ -506,7 +527,6 @@ canvas.addEventListener('mouseup', function (evt) {
     mouseClickMidpointOnDrag = new Point();
 
 
-
     if (CurrentToolStatus === "AddLinePoint") {
         Connections[UIselectedConnectionID].AddLinePoin(mousePos)
         UIsetCurrentToolStatus("");
@@ -519,12 +539,11 @@ canvas.addEventListener('mouseup', function (evt) {
     UIshowSymbolLayoutInfo(UIselectedSymbolID);
 
 
-
     if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
         UIdragDetect = true;
 
-        mouseClickMidpointOnDrag.x = (detextifdrag.x + mousePos.x) /2 ;
-        mouseClickMidpointOnDrag.y = (detextifdrag.y + mousePos.y) /2 ;
+        mouseClickMidpointOnDrag.x = (detextifdrag.x + mousePos.x) / 2;
+        mouseClickMidpointOnDrag.y = (detextifdrag.y + mousePos.y) / 2;
         console.log(mouseClickMidpointOnDrag);
 
         UIselectedConnectionID = CheckConnectionPointClick(detextifdrag);
@@ -554,9 +573,6 @@ canvas.addEventListener('mouseup', function (evt) {
 
 
     }
-
-
-
 
 
     if (CurrentToolStatus === "moveSymbol") {
@@ -941,8 +957,8 @@ function UIdisplayConnectionTable() {
     row.insertCell(2).innerHTML = "pin1";
     row.insertCell(3).innerHTML = "id2";
     row.insertCell(4).innerHTML = "pin2";
-    row.insertCell(5).innerHTML = "Jogged";
-    row.insertCell(6).innerHTML = "jogPosition";
+    row.insertCell(5).innerHTML = "Net ID";
+
     for (x = 1; x <= MaxConnections; x++) {
 
         if (Connections[x].id2) {
@@ -969,8 +985,8 @@ function UIdisplayConnectionTable() {
             row.insertCell(2).innerHTML = Connections[x].pin1;
             row.insertCell(3).innerHTML = Layout[Connections[x].id2].ReferenceDesignator;
             row.insertCell(4).innerHTML = Connections[x].pin2;
-            row.insertCell(5).innerHTML = Connections[x].jogged;
-            row.insertCell(6).innerHTML = Connections[x].jogPosition;
+            row.insertCell(5).innerHTML = Connections[x].netID;
+
 
             if (UIselectedConnectionID === x) {
                 row.style.backgroundColor = "red";
@@ -982,6 +998,46 @@ function UIdisplayConnectionTable() {
     }
 
 
+}
+
+
+function UIgenerateNetList() {
+    for (x = 1; x <= MaxConnections; x++) {
+        Connections[x].netID = undefined;
+    }
+
+    netIdsCounter = 0;
+    for (i = 1; i <= 10; i++) {
+        for (x = 1; x <= MaxConnections; x++) {
+            for (y = 1; y <= MaxConnections; y++) {
+                if (Connections[x].connected() && Connections[y].connected()) {
+                    if (Connections[x].netCheck(Connections[y])) {
+                        newNetID = 0;
+                        newNetIDx = 0;
+                        newNetIDy = 0;
+
+                        if (Connections[x].netID > 0) newNetIDx = Connections[x].netID;
+                        if (Connections[y].netID > 0) newNetIDy = Connections[y].netID;
+
+                        newNetID = Math.min(newNetIDx, newNetIDy);
+
+                        if (newNetID === 0) {
+                            netIdsCounter = netIdsCounter + 1;
+                            newNetID = netIdsCounter;
+
+                        }
+
+                        Connections[x].netID = newNetID;
+                        Connections[y].netID = newNetID;
+
+                    }
+                }
+            }
+
+        }
+    }
+
+    UIdisplayConnectionTable();
 }
 
 renderLayout();

@@ -8,6 +8,8 @@
         <a href="SymbolEditor.htm">Symbol Editor</a>
         <button value="Save" onclick="UIsaveStoredLayout();"> <i class="fa fa-floppy-o" aria-hidden="true"></i></button>
         <input type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()" value=".5">
+        <button value="Generate Nets" id="GenNets" onclick="UIgenerateNetList();" >Generate Nets</button>
+
         <button value="Add. Point" id="addPoint" onclick="UIsetCurrentToolStatus('AddLinePoint');" style="display:none;">Add Point</button>
 
     </div>
@@ -69,7 +71,8 @@
 </div>
 
 
-<script src="engine.js"></script>
+<script src="Schematic-Layout-Engine.js"></script>
+<script src="Board-Layout-Engine.js"></script>
 <script>
 
 </script>
