@@ -950,6 +950,9 @@ function drawRotatedImage(image, x, y, angle) {
     // draw it up and to the left by half the width
     // and height of the image
     context.drawImage(image, -(image.width / 2), -(image.height / 2));
+    context.setLineDash([6]);
+    context.lineWidth=1;
+    context.strokeRect(-(image.width / 2), -(image.height / 2), image.width, image.height );
 
     // and restore the co-ords to how they were when we began
     context.restore();
