@@ -40,6 +40,7 @@ function UIsetAplicationModeSetting() {
     document.getElementsByName("Board Layout").forEach(function (item) {
         item.style.display = BoardLayoutModeStyle;
     });
+    renderLayout();
 
 
 }
@@ -81,6 +82,7 @@ function CircuitSymbols() {
         this.width = 0;
         this.height = 0;
         this.img = new Image();
+        this.padsImg = new Image();
         return "deleted";
     };
 
@@ -110,8 +112,7 @@ function CircuitConnections() {
     this.pin1 = "";
     this.id2 = 0;
     this.pin2 = "";
-    this.jogged = "";
-    this.jogPosition = 0;
+
     this.netID = undefined;
     this.linePoints = [];
 
@@ -124,8 +125,6 @@ function CircuitConnections() {
         this.pin1 = "";
         this.id2 = 0;
         this.pin2 = "";
-        this.jogged = "";
-        this.jogPosition = 0;
         this.linePoints = [];
 
 
@@ -268,6 +267,27 @@ function CircuitLayout() {
         return 0;
     };
 
+    this.movePadsRelative = function (x, y) {
+        this.PadX += parseInt(x);
+        this.PadY += parseInt(y);
+    };
+
+    this.DetectIfPadsUnderXY = function (x, y) {
+        if (this.SymbolID <= 0 || Symbols[this.SymbolID].Name === "JUNCTION") return 0;
+
+        wid = Symbols[this.SymbolID].padsImg.width;
+        hei = Symbols[this.SymbolID].padsImg.height;
+
+        if (this.PadRotation == 90 || this.PadRotation == 90) [wid, hei] = [hei, wid];
+
+        if (x > this.PadX - wid / 2 && x < this.PadX + wid / 2 && y > this.PadY - hei / 2 && y < this.PadY + hei / 2) {
+
+            return 1;
+
+        }
+        return 0;
+    };
+
 
     this.UIshowProperties = function () {
 
@@ -293,6 +313,12 @@ function CircuitLayout() {
         drawRotatedImage(Symbols[this.SymbolID].img, this.SchematicX, this.SchematicY, this.SchematicRotation);
     };
 
+
+    this.RenderBoardLayoutItem = function () {
+        if (this.SymbolID <= 0 || Symbols[this.SymbolID].Name === "JUNCTION") return;
+
+        drawRotatedImage(Symbols[this.SymbolID].padsImg, this.PadX, this.PadY, this.PadRotation);
+    };
 
     this.RenderLayoutPoints = function (checkIfPointClickedHack) {
 
@@ -422,6 +448,7 @@ function UIloadStoredLayout() {
         if (Symbols[x].Name !== "") {
             UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
             Symbols[x].img.src = "../../../Storage/Symbols/" + x + '-Symbol.png';
+            Symbols[x].padsImg.src = "../../../Storage/Symbols/" + x + '-Pads.png';
         }
 
 
@@ -516,20 +543,23 @@ function doKeyDown(e) {
     }
     //alert( e.keyCode );
     //detect escape key
-    if (e.keyCode === 27) {
-        UIsetCurrentToolStatus("");
-        UIselectedSymbolID = undefined;
-        UIselectedConnectionID = undefined;
-    }
-    //detect delete key
-    if (e.keyCode === 46) {
-        UIsetCurrentToolStatus("");
-        if (Connections[UIselectedConnectionID].linePoints.length === 1) Connections[UIselectedConnectionID].delete();
+    if (AplicationModeSetting === "Schematic") {
+        if (e.keyCode === 27) {
+            UIsetCurrentToolStatus("");
+            UIselectedSymbolID = undefined;
+            UIselectedConnectionID = undefined;
+        }
+        //detect delete key
+        if (e.keyCode === 46) {
+            UIsetCurrentToolStatus("");
+            if (Connections[UIselectedConnectionID].linePoints.length === 1) Connections[UIselectedConnectionID].delete();
 
-        Connections[UIselectedConnectionID].linePoints.splice(UISelectedLinePoint, 1);
+            Connections[UIselectedConnectionID].linePoints.splice(UISelectedLinePoint, 1);
 
+        }
+        renderLayout();
     }
-    renderLayout();
+
 
 }
 
@@ -561,143 +591,178 @@ var mousePos;
 canvas.addEventListener('mouseup', function (evt) {
     //exit current command on right click
     if (evt.button === 2) UIsetCurrentToolStatus("");
-
     mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
 
     mouseClickMidpointOnDrag = new Point();
 
+    if (AplicationModeSetting === "Board Layout") {
 
-    if (CurrentToolStatus === "AddLinePoint") {
-        Connections[UIselectedConnectionID].AddLinePoin(mousePos)
-        UIsetCurrentToolStatus("");
-    }
+        UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+        UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
+        UIsetCurrentToolStatus("moveSymbol");
 
-
-    UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
-    UIselectedConnectionID = CheckConnectionPointClick(mousePos);
-
-    UIshowSymbolLayoutInfo(UIselectedSymbolID);
-
-
-    if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
-        UIdragDetect = true;
-
-        mouseClickMidpointOnDrag.x = (detextifdrag.x + mousePos.x) / 2;
-        mouseClickMidpointOnDrag.y = (detextifdrag.y + mousePos.y) / 2;
-        console.log(mouseClickMidpointOnDrag);
-
-        UIselectedConnectionID = CheckConnectionPointClick(detextifdrag);
-
-        if (UIselectedConnectionID && UISelectedLinePoint !== false) {
-            Connections[UIselectedConnectionID].linePoints[UISelectedLinePoint] = mousePos;
-
-        }
-
-
-        bla = CheckLayoutSymbolPinClick(detextifdrag);
-        if (bla !== CheckLayoutSymbolPinClick(detextifdrag) && CheckLayoutSymbolPinClick(mousePos)) {
-            UIaddConnectionButtonClick();
-            Connections[UIselectedConnectionID].id1 = bla.id;
-            Connections[UIselectedConnectionID].pin1 = bla.pin;
-            CurrentToolStatus = "addConnection";
-
-
-        }
-        else {
-            UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
-            UIsetCurrentToolStatus("moveSymbol");
+        if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
+            UIdragDetect = true;
             detextifdrag.x = mousePos.x - detextifdrag.x;
             detextifdrag.y = mousePos.y - detextifdrag.y;
+        }
+
+
+        if (CurrentToolStatus === "moveSymbol") {
+            //UIselectedSymbolID = document.getElementById("LayoutID").value;
+            if (Layout[UIselectedSymbolID] !== undefined) {
+
+                if (UIdragDetect = true) {
+                    //put code here to move symbol relative to click position and not center point.
+                    Layout[UIselectedSymbolID].movePadsRelative(detextifdrag.x, detextifdrag.y)
+                }
+
+
+                UIshowSymbolLayoutInfo(UIselectedSymbolID);
+                UIsetCurrentToolStatus("symbolPic");
+            }
+
+        }
+    }
+
+
+    if (AplicationModeSetting === "Schematic") {
+        if (evt.button === 2) UIsetCurrentToolStatus("");
+
+
+
+        if (CurrentToolStatus === "AddLinePoint") {
+            Connections[UIselectedConnectionID].AddLinePoin(mousePos)
+            UIsetCurrentToolStatus("");
+        }
+
+
+        UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+        UIselectedConnectionID = CheckConnectionPointClick(mousePos);
+
+        UIshowSymbolLayoutInfo(UIselectedSymbolID);
+
+
+        if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
+            UIdragDetect = true;
+
+            mouseClickMidpointOnDrag.x = (detextifdrag.x + mousePos.x) / 2;
+            mouseClickMidpointOnDrag.y = (detextifdrag.y + mousePos.y) / 2;
+            console.log(mouseClickMidpointOnDrag);
+
+            UIselectedConnectionID = CheckConnectionPointClick(detextifdrag);
+
+            if (UIselectedConnectionID && UISelectedLinePoint !== false) {
+                Connections[UIselectedConnectionID].linePoints[UISelectedLinePoint] = mousePos;
+
+            }
+
+
+            bla = CheckLayoutSymbolPinClick(detextifdrag);
+            if (bla !== CheckLayoutSymbolPinClick(detextifdrag) && CheckLayoutSymbolPinClick(mousePos)) {
+                UIaddConnectionButtonClick();
+                Connections[UIselectedConnectionID].id1 = bla.id;
+                Connections[UIselectedConnectionID].pin1 = bla.pin;
+                CurrentToolStatus = "addConnection";
+
+
+            }
+            else {
+                UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
+                UIsetCurrentToolStatus("moveSymbol");
+                detextifdrag.x = mousePos.x - detextifdrag.x;
+                detextifdrag.y = mousePos.y - detextifdrag.y;
+
+            }
+
 
         }
 
 
-    }
+        if (CurrentToolStatus === "moveSymbol") {
+            //UIselectedSymbolID = document.getElementById("LayoutID").value;
+            if (Layout[UIselectedSymbolID] !== undefined) {
 
+                if (UIdragDetect = true) {
+                    //put code here to move symbol relative to click position and not center point.
+                    Layout[UIselectedSymbolID].moveSymbolRelative(detextifdrag.x, detextifdrag.y)
+                }
+                else {
+                    Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y)
+                }
 
-    if (CurrentToolStatus === "moveSymbol") {
-        //UIselectedSymbolID = document.getElementById("LayoutID").value;
-        if (Layout[UIselectedSymbolID] !== undefined) {
-
-            if (UIdragDetect = true) {
-                //put code here to move symbol relative to click position and not center point.
-                Layout[UIselectedSymbolID].moveSymbolRelative(detextifdrag.x, detextifdrag.y)
+                UIshowSymbolLayoutInfo(UIselectedSymbolID);
+                UIsetCurrentToolStatus("symbolPic");
             }
-            else {
-                Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y)
+
+        }
+
+
+        if (CurrentToolStatus === "addSymbol") {
+            UIselectedSymbolID = "";
+
+            for (x = 1; x <= MaxLayout; x++) {
+
+                if (Layout[x].SymbolID === 0) {
+
+                    UIselectedSymbolID = x;
+                    Layout[x].SymbolID = UIsymbolToAdd;
+                    Layout[x].ReferenceDesignator = Symbols[UIsymbolToAdd].ReferenceDesignator + x;
+
+
+                    Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
+                    UIshowSymbolLayoutInfo(UIselectedSymbolID);
+                    UIsetCurrentToolStatus("symbolPic");
+
+                    break;
+                }
+
             }
+
 
             UIshowSymbolLayoutInfo(UIselectedSymbolID);
             UIsetCurrentToolStatus("symbolPic");
         }
 
-    }
 
+        if (CurrentToolStatus === "addConnection") {
+            if (Connections[UIselectedConnectionID].id1 === 0) {
+                bla = CheckLayoutSymbolPinClick(mousePos);
+                if (bla) {
+                    Connections[UIselectedConnectionID].id1 = bla.id;
+                    Connections[UIselectedConnectionID].pin1 = bla.pin;
+                    renderLayout();
+                    return
+                }
 
-    if (CurrentToolStatus === "addSymbol") {
-        UIselectedSymbolID = "";
+            } else if (Connections[UIselectedConnectionID].id2 === 0) {
 
-        for (x = 1; x <= MaxLayout; x++) {
+                bla = CheckLayoutSymbolPinClick(mousePos);
+                if (Connections[UIselectedConnectionID].id1 == bla.id && Connections[UIselectedConnectionID].pin1 == bla.pin) {
+                    renderLayout();
+                    return;
+                }
+                if (bla) {
+                    Connections[UIselectedConnectionID].id2 = bla.id;
+                    Connections[UIselectedConnectionID].pin2 = bla.pin;
+                    Connections[UIselectedConnectionID].AddLinePoin(mouseClickMidpointOnDrag);
+                    renderLayout();
+                }
+            }
 
-            if (Layout[x].SymbolID === 0) {
+            if (Connections[UIselectedConnectionID].id1 && Connections[UIselectedConnectionID].id2) {
 
-                UIselectedSymbolID = x;
-                Layout[x].SymbolID = UIsymbolToAdd;
-                Layout[x].ReferenceDesignator = Symbols[UIsymbolToAdd].ReferenceDesignator + x;
-
-
-                Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
-                UIshowSymbolLayoutInfo(UIselectedSymbolID);
                 UIsetCurrentToolStatus("symbolPic");
-
-                break;
-            }
-
-        }
-
-
-        UIshowSymbolLayoutInfo(UIselectedSymbolID);
-        UIsetCurrentToolStatus("symbolPic");
-    }
-
-
-    if (CurrentToolStatus === "addConnection") {
-        if (Connections[UIselectedConnectionID].id1 === 0) {
-            bla = CheckLayoutSymbolPinClick(mousePos);
-            if (bla) {
-                Connections[UIselectedConnectionID].id1 = bla.id;
-                Connections[UIselectedConnectionID].pin1 = bla.pin;
-                renderLayout();
-                return
-            }
-
-        } else if (Connections[UIselectedConnectionID].id2 === 0) {
-
-            bla = CheckLayoutSymbolPinClick(mousePos);
-            if (Connections[UIselectedConnectionID].id1 == bla.id && Connections[UIselectedConnectionID].pin1 == bla.pin) {
-                renderLayout();
-                return;
-            }
-            if (bla) {
-                Connections[UIselectedConnectionID].id2 = bla.id;
-                Connections[UIselectedConnectionID].pin2 = bla.pin;
-                Connections[UIselectedConnectionID].AddLinePoin(mouseClickMidpointOnDrag);
                 renderLayout();
             }
+
+
         }
-
-        if (Connections[UIselectedConnectionID].id1 && Connections[UIselectedConnectionID].id2) {
-
-            UIsetCurrentToolStatus("symbolPic");
-            renderLayout();
-        }
-
 
     }
-
-
     renderLayout();
+
 }, false);
 
 var UIsymbolToAdd = "";
@@ -789,13 +854,29 @@ function UIsymbolLayoutButtonClick(ActionToBeTaken) {
 
 function CheckLayoutSymbolClick(x, y) {
 
-    for (i = 1; i <= MaxLayout; i++) {
-        if (Layout[i].DetectIfSymbolUnderXY(x, y)) {
-            return i;
+    if (AplicationModeSetting === "Board Layout") {
+        for (i = 1; i <= MaxLayout; i++) {
+            if (Layout[i].DetectIfPadsUnderXY(x, y)) {
+                return i;
+            }
         }
+        return 0;
+
     }
-    return 0;
+
+
+    if (AplicationModeSetting === "Schematic") {
+        for (i = 1; i <= MaxLayout; i++) {
+            if (Layout[i].DetectIfSymbolUnderXY(x, y)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+
 }
+
 
 function CheckLayoutSymbolPinClick(CheckLayoutSymbolPinClickMyPoint) {
 
@@ -875,29 +956,53 @@ function drawRotatedImage(image, x, y, angle) {
 }
 
 function renderLayout() {
-
     context.clearRect(0, 0, canvas.width, canvas.height);
-    for (x = 1; x <= MaxLayout; x++) {
-        Layout[x].RenderLayoutItem();
-        Layout[x].RenderLayoutPoints();
-
-    }
-
-    for (x = 1; x <= MaxConnections; x++) {
 
 
-        if (x === UIselectedConnectionID) {
+    if (AplicationModeSetting === "Board Layout") {
 
-            Connections[x].DrawMe("red");
+        for (x = 1; x <= MaxLayout; x++) {
+            Layout[x].RenderBoardLayoutItem();
+            //Layout[x].RenderLayoutPoints();
 
         }
-        else {
-
-            Connections[x].DrawMe("black");
-        }
+        UIdisplayDevicesTable();
     }
-    UIdisplayConnectionTable();
-    UIdisplayDevicesTable();
+
+
+    if (AplicationModeSetting === "Schematic") {
+
+        for (x = 1; x <= MaxLayout; x++) {
+            Layout[x].RenderLayoutItem();
+            Layout[x].RenderLayoutPoints();
+
+        }
+
+        for (x = 1; x <= MaxConnections; x++) {
+
+
+            if (x === UIselectedConnectionID) {
+
+                Connections[x].DrawMe("red");
+
+            }
+            else {
+
+                Connections[x].DrawMe("black");
+            }
+        }
+        UIdisplayConnectionTable();
+        UIdisplayDevicesTable();
+        //renderLayoutItemPoints(UIselectedSymbolID);
+    }
+
+
+}
+
+function renderBoardLayout() {
+
+
+
     //renderLayoutItemPoints(UIselectedSymbolID);
 }
 
@@ -1053,14 +1158,14 @@ function UIdisplayNetListTable() {
     row.insertCell(1).innerHTML = "Devices / Pin";
     i = 0;
 
-    NetList.forEach(function (item,index) {
+    NetList.forEach(function (item, index) {
         i++;
         var row = table.insertRow(-1);
         row.insertCell(0).innerHTML = item.netID;
         bla = "";
 
 
-        if (item.netItems){
+        if (item.netItems) {
             item.netItems.forEach(function (item) {
                 bla += item.deviceRefDesignator + " / " + item.devicePinID + "<br>";
             });
