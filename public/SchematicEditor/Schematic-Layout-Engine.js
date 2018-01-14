@@ -15,30 +15,30 @@ resolution = 20;
 Connections = [];
 Symbols = [];
 Layout = [];
+NetList = [];
 
 
-function UIsetAplicationModeSetting()
-{
-    AplicationModeSetting =  document.getElementById("AplicationModeSetting").value;
+function UIsetAplicationModeSetting() {
+    AplicationModeSetting = document.getElementById("AplicationModeSetting").value;
 
-    if (AplicationModeSetting === "Schematic" ){
+    if (AplicationModeSetting === "Schematic") {
         ScematicModeStyle = "";
-    }else {
+    } else {
         ScematicModeStyle = "none";
     }
 
-    if (AplicationModeSetting === "Board Layout" ){
+    if (AplicationModeSetting === "Board Layout") {
         BoardLayoutModeStyle = "";
-    }else {
+    } else {
         BoardLayoutModeStyle = "none";
     }
 
-    document.getElementsByName("Schematic").forEach(function (item){
+    document.getElementsByName("Schematic").forEach(function (item) {
         item.style.display = ScematicModeStyle;
     });
 
-    document.getElementsByName("Board Layout").forEach(function (item){
-        item.style.display = BoardLayoutModeStyle ;
+    document.getElementsByName("Board Layout").forEach(function (item) {
+        item.style.display = BoardLayoutModeStyle;
     });
 
 
@@ -67,6 +67,12 @@ function Point() {
     }
 }
 
+function NetItem() {
+    this.deviceID = 0;
+    this.deviceRefDesignator = "";
+    this.devicePinID = "";
+}
+
 function CircuitSymbols() {
     this.delete = function () {
         this.Name = "";
@@ -92,6 +98,12 @@ function CircuitSymbols() {
     this.delete();
 }
 
+
+function CircuitNets() {
+    this.netID = undefined;
+    this.netItems = [];
+
+}
 
 function CircuitConnections() {
     this.id1 = 0;
@@ -187,7 +199,7 @@ function CircuitConnections() {
         UIselectedConnectionID = bla;
         renderLayout();
         this.DrawMe("red");
-        CurrentToolStatus = "AddLinePoint";
+
     };
 
     this.AddLinePoin = function (mypoint) {
@@ -499,9 +511,8 @@ var canvas = document.getElementById('myCanvas');
 window.addEventListener("keydown", doKeyDown, true);
 
 function doKeyDown(e) {
-    if (AplicationModeSetting === "Board Layout")
-    {
-        UIboardLayoutEngineKeyboardPress(e.keyCode )
+    if (AplicationModeSetting === "Board Layout") {
+        UIboardLayoutEngineKeyboardPress(e.keyCode)
     }
     //alert( e.keyCode );
     //detect escape key
@@ -1031,13 +1042,45 @@ function UIdisplayConnectionTable() {
 }
 
 
+function UIdisplayNetListTable() {
+
+    var table = document.getElementById("NetListTable");
+    table.innerHTML = "";
+    var row = table.insertRow(-1);
+
+
+    row.insertCell(0).innerHTML = "Net ID";
+    row.insertCell(1).innerHTML = "Devices / Pin";
+    i = 0;
+
+    NetList.forEach(function (item,index) {
+        i++;
+        var row = table.insertRow(-1);
+        row.insertCell(0).innerHTML = item.netID;
+        bla = "";
+
+
+        if (item.netItems){
+            item.netItems.forEach(function (item) {
+                bla += item.deviceRefDesignator + " / " + item.devicePinID + "<br>";
+            });
+        }
+
+
+        row.insertCell(1).innerHTML = bla;
+
+    });
+
+
+}
+
 function UIgenerateNetList() {
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x].netID = undefined;
     }
 
     netIdsCounter = 0;
-    for (i = 1; i <= 10; i++) {
+    for (i = 1; i <= MaxConnections; i++) {
         for (x = 1; x <= MaxConnections; x++) {
             for (y = 1; y <= MaxConnections; y++) {
                 if (Connections[x].connected() && Connections[y].connected()) {
@@ -1067,7 +1110,51 @@ function UIgenerateNetList() {
         }
     }
 
+
+    for (x = 1; x <= MaxConnections; x++) {
+        if (Connections[x].connected()) {
+            netID = Connections[x].netID;
+
+            if (!NetList[netID]) NetList[netID] = new CircuitNets();
+            NetList[netID].netID = netID;
+
+
+            bla = new NetItem();
+            bla.deviceID = Connections[x].id1;
+            bla.devicePinID = Connections[x].pin1;
+            bla.deviceRefDesignator = Layout[Connections[x].id1].ReferenceDesignator;
+            if (bla.devicePinID !== "JUNCTION") NetList[netID].netItems.push(bla);
+
+
+            bla = new NetItem();
+            bla.deviceID = Connections[x].id2;
+            bla.devicePinID = Connections[x].pin2;
+            bla.deviceRefDesignator = Layout[Connections[x].id2].ReferenceDesignator;
+            ;
+            if (bla.devicePinID !== "JUNCTION") NetList[netID].netItems.push(bla);
+            //NetList[netID].netItems = removeDuplicates(NetList[netID].netItems);
+
+            NetList[netID].netItems = Array.from(new Set(NetList[netID].netItems.map(JSON.stringify))).map(JSON.parse)
+
+        }
+
+
+    }
+
     UIdisplayConnectionTable();
+    UIdisplayNetListTable();
+    //console.log(NetList);
+}
+
+
+function removeDuplicates(arr) {
+    let unique_array = []
+    for (let i = 0; i < arr.length; i++) {
+        if (unique_array.indexOf(arr[i]) == -1) {
+            unique_array.push(arr[i])
+        }
+    }
+    return unique_array
 }
 
 renderLayout();
