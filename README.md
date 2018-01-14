@@ -3,7 +3,7 @@
 # The goal of this project is to make an open source schematic capture and PCB layout tool that is 100% browser based. 
 
 The rest of the files in the project are the files required for a laravel PHP system to provide server side storaage of data. 
-The javascript portion is the main focus and is designed to be able to be used with out the server side functionality dso that this tool can be intergrated in to what ever system desired as the end product. 
+The javascript portion is the main focus and is designed to be able to be used with out the server side functionality so that this tool can be intergrated in to what ever system desired as the end product. 
 
 
 Stay tuned for updates in this.
@@ -19,7 +19,7 @@ This software is not production ready and has almost none of the required functi
 - Connection tool
   - Captures symbol id and pin for a from and to device
   - Visualises the connnection as a line between the connected points
-    - Lacking currently the capability of placing jogs in a conection line (visualised as a direct line)
+  - Allows creation of points on a connection to jog line arround other entitys
   - Displays data in table for each connection (symbol and pin IDs)
 - PCB layout tool
   - data structures in place to hold symbol placement and orientation
@@ -27,8 +27,9 @@ This software is not production ready and has almost none of the required functi
   
   
 # Todo
-- Connection tool
-  - Add capability of placing points on line connection objects to shape the path
-  - Selection of conection line from the graphics area.
+- Impliment netlist data capabilitys 
+  - Determin points of same potential from connection list
+  - Assign points of same potential a net ID
+  
 - PCB layout tool
   - EVERY THING !!!!!!!!!!
