@@ -11,19 +11,30 @@
             <option>Board Layout</option>
         </select>
 
-        <input name="Schematic" type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()" value=".5">
+        <input name="Schematic" type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()"
+               value=".5">
         <button value="Generate Nets" id="GenNets" onclick="UIgenerateNetList();">Generate Nets</button>
-
 
 
         <button name="Schematic" value="Add. Point" id="addPoint" onclick="UIsetCurrentToolStatus('AddLinePoint');"
                 style="display:none;">Add Point
         </button>
 
+        <span name="Board Layout">
+            <span id="PadsLayoutRotateButtons" style="display: none">
+                <button value="<" onclick="UIsymbolLayoutButtonClick('rotate left');">
+                    <i class="fa fa-undo" aria-hidden="true"></i>
+                </button>
+                <button value=">" onclick="UIsymbolLayoutButtonClick('rotate right');">
+                    <i class="fa fa-repeat" aria-hidden="true"></i>
+                </button>
+            </span>
+        </span>
+
+
         <button name="Board Layout" value="CheckBoxes" id="CheckBoxes" onclick="UIBoarLayoutEngineCheckOverlaps();">
             Check Boxes
         </button>
-
 
 
     </div>
@@ -59,7 +70,7 @@
         </div>
         <div class="right">
 
-            <div name="Schematic" >
+            <div name="Schematic">
                 Layout ID:<input type="text" size="5" id="LayoutID" value=""><br>
                 Symbol ID:<input type="text" size="5" id="SymbolID" value=""><br>
                 Reference Designator: <input type="text" size="5" id="ReferenceDesignator" value=""><br>
@@ -87,7 +98,7 @@
                 </table>
             </div>
 
-            <div  name="Board Layout"  style="overflow: auto; height: 300px; border: black">
+            <div name="Board Layout" style="overflow: auto; height: 300px; border: black">
                 <table id="NetListTable" border="1" style="border: 1px solid black;;font-size: .75em;">
                 </table>
             </div>

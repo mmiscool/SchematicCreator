@@ -45,6 +45,7 @@ function UIsetAplicationModeSetting() {
 
 }
 
+
 function UIsetCurrentToolStatus(mystatus) {
     CurrentToolStatus = mystatus;
     document.getElementById("CurrentToolStatus").value = CurrentToolStatus;
@@ -307,17 +308,17 @@ function CircuitLayout() {
         this.SchematicRotation = Number(document.getElementById("SchematicRotation").value);
     };
 
-    this.RenderLayoutItem = function () {
+    this.RenderLayoutItem = function (collor) {
         if (this.SymbolID <= 0) return;
 
-        drawRotatedImage(Symbols[this.SymbolID].img, this.SchematicX, this.SchematicY, this.SchematicRotation);
+        drawRotatedImage(Symbols[this.SymbolID].img, this.SchematicX, this.SchematicY, this.SchematicRotation, collor);
     };
 
 
-    this.RenderBoardLayoutItem = function () {
+    this.RenderBoardLayoutItem = function (collor) {
         if (this.SymbolID <= 0 || Symbols[this.SymbolID].Name === "JUNCTION") return;
 
-        drawRotatedImage(Symbols[this.SymbolID].padsImg, this.PadX, this.PadY, this.PadRotation);
+        drawRotatedImage(Symbols[this.SymbolID].padsImg, this.PadX, this.PadY, this.PadRotation, collor);
     };
 
     this.RenderLayoutPoints = function (checkIfPointClickedHack) {
@@ -593,19 +594,22 @@ canvas.addEventListener('mouseup', function (evt) {
     if (evt.button === 2) UIsetCurrentToolStatus("");
     mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
+    UIdragDetect = true;
 
     mouseClickMidpointOnDrag = new Point();
 
     if (AplicationModeSetting === "Board Layout") {
 
-        UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
+        //UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
         UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
-        UIsetCurrentToolStatus("moveSymbol");
+        UIshowSymbolLayoutInfo(UIselectedSymbolID);
 
         if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
             UIdragDetect = true;
             detextifdrag.x = mousePos.x - detextifdrag.x;
             detextifdrag.y = mousePos.y - detextifdrag.y;
+
+            UIsetCurrentToolStatus("moveSymbol");
         }
 
 
@@ -613,7 +617,7 @@ canvas.addEventListener('mouseup', function (evt) {
             //UIselectedSymbolID = document.getElementById("LayoutID").value;
             if (Layout[UIselectedSymbolID] !== undefined) {
 
-                if (UIdragDetect = true) {
+                if (UIdragDetect === true) {
                     //put code here to move symbol relative to click position and not center point.
                     Layout[UIselectedSymbolID].movePadsRelative(detextifdrag.x, detextifdrag.y)
                 }
@@ -629,7 +633,6 @@ canvas.addEventListener('mouseup', function (evt) {
 
     if (AplicationModeSetting === "Schematic") {
         if (evt.button === 2) UIsetCurrentToolStatus("");
-
 
 
         if (CurrentToolStatus === "AddLinePoint") {
@@ -684,7 +687,7 @@ canvas.addEventListener('mouseup', function (evt) {
             //UIselectedSymbolID = document.getElementById("LayoutID").value;
             if (Layout[UIselectedSymbolID] !== undefined) {
 
-                if (UIdragDetect = true) {
+                if (UIdragDetect === true) {
                     //put code here to move symbol relative to click position and not center point.
                     Layout[UIselectedSymbolID].moveSymbolRelative(detextifdrag.x, detextifdrag.y)
                 }
@@ -802,6 +805,7 @@ function UIshowSymbolLayoutInfo() {
     if (UIselectedSymbolID) {
         document.getElementById("LayoutID").value = UIselectedSymbolID;
         Layout[UIselectedSymbolID].UIshowProperties();
+        document.getElementById("PadsLayoutRotateButtons").style.display = "";
     }
     else {
         document.getElementById("LayoutID").value = UIselectedSymbolID;
@@ -810,45 +814,70 @@ function UIshowSymbolLayoutInfo() {
         document.getElementById("SchematicX").value = 0;
         document.getElementById("SchematicY").value = 0;
         document.getElementById("SchematicRotation").value = 0;
+        document.getElementById("PadsLayoutRotateButtons").style.display = "none";
     }
+    renderLayout();
 
 }
 
 function UIsymbolLayoutButtonClick(ActionToBeTaken) {
-    UIselectedSymbolID = document.getElementById("LayoutID").value;
-    if (UIselectedSymbolID === "undefined" || UIselectedSymbolID === "" || UIselectedSymbolID === null) return;
 
 
-    if (ActionToBeTaken == "delete") {
-        Layout[UIselectedSymbolID].delete()
-        renderLayout();
-        UIshowSymbolLayoutInfo(UIselectedSymbolID);
+    if (AplicationModeSetting === "Board Layout") {
+        if (ActionToBeTaken === "rotate left") {
+            Layout[UIselectedSymbolID].PadRotation -= 90;
+            if (Layout[UIselectedSymbolID].PadRotation === -90) Layout[UIselectedSymbolID].PadRotation = 270;
+            renderLayout();
+            UIshowSymbolLayoutInfo();
+        }
+
+        if (ActionToBeTaken === "rotate right") {
+            Layout[UIselectedSymbolID].PadRotation += 90;
+            if (Layout[UIselectedSymbolID].PadRotation === 360) Layout[UIselectedSymbolID].PadRotation = 0;
+            renderLayout();
+            UIshowSymbolLayoutInfo();
+        }
     }
 
 
-    if (ActionToBeTaken == "move") {
-        UIsetCurrentToolStatus("moveSymbol");
-    }
-
-    if (ActionToBeTaken == "apply") {
-        Layout[UIselectedSymbolID].UIupdateFromProperties();
-        renderLayout();
-    }
+    if (AplicationModeSetting === "Schematic") {
+        UIselectedSymbolID = document.getElementById("LayoutID").value;
+        if (UIselectedSymbolID === "undefined" || UIselectedSymbolID === "" || UIselectedSymbolID === null) return;
 
 
-    if (ActionToBeTaken == "rotate left") {
-        Layout[UIselectedSymbolID].SchematicRotation -= 90;
-        if (Layout[UIselectedSymbolID].SchematicRotation === -90) Layout[UIselectedSymbolID].SchematicRotation = 270;
-        renderLayout();
-        UIshowSymbolLayoutInfo();
+        if (ActionToBeTaken == "delete") {
+            Layout[UIselectedSymbolID].delete()
+            renderLayout();
+            UIshowSymbolLayoutInfo(UIselectedSymbolID);
+        }
+
+
+        if (ActionToBeTaken == "move") {
+            UIsetCurrentToolStatus("moveSymbol");
+        }
+
+        if (ActionToBeTaken == "apply") {
+            Layout[UIselectedSymbolID].UIupdateFromProperties();
+            renderLayout();
+        }
+
+
+        if (ActionToBeTaken == "rotate left") {
+            Layout[UIselectedSymbolID].SchematicRotation -= 90;
+            if (Layout[UIselectedSymbolID].SchematicRotation === -90) Layout[UIselectedSymbolID].SchematicRotation = 270;
+            renderLayout();
+            UIshowSymbolLayoutInfo();
+        }
+
+        if (ActionToBeTaken == "rotate right") {
+            Layout[UIselectedSymbolID].SchematicRotation += 90;
+            if (Layout[UIselectedSymbolID].SchematicRotation === 360) Layout[UIselectedSymbolID].SchematicRotation = 0;
+            renderLayout();
+            UIshowSymbolLayoutInfo();
+        }
     }
 
-    if (ActionToBeTaken == "rotate right") {
-        Layout[UIselectedSymbolID].SchematicRotation += 90;
-        if (Layout[UIselectedSymbolID].SchematicRotation === 360) Layout[UIselectedSymbolID].SchematicRotation = 0;
-        renderLayout();
-        UIshowSymbolLayoutInfo();
-    }
+
 }
 
 
@@ -934,7 +963,7 @@ function UIdrawLine(point1, point2, collor) {
 }
 
 
-function drawRotatedImage(image, x, y, angle) {
+function drawRotatedImage(image, x, y, angle, collor) {
     var TO_RADIANS = Math.PI / 180;
     // save the current co-ordinate system
     // before we screw with it
@@ -949,10 +978,12 @@ function drawRotatedImage(image, x, y, angle) {
 
     // draw it up and to the left by half the width
     // and height of the image
+    context.strokeStyle = "black";
     context.drawImage(image, -(image.width / 2), -(image.height / 2));
     context.setLineDash([6]);
-    context.lineWidth=1;
-    context.strokeRect(-(image.width / 2), -(image.height / 2), image.width, image.height );
+    context.lineWidth = 1;
+    if (collor) context.strokeStyle = collor;
+    context.strokeRect(-(image.width / 2), -(image.height / 2), image.width, image.height);
 
     // and restore the co-ords to how they were when we began
     context.restore();
@@ -965,7 +996,13 @@ function renderLayout() {
     if (AplicationModeSetting === "Board Layout") {
 
         for (x = 1; x <= MaxLayout; x++) {
-            Layout[x].RenderBoardLayoutItem();
+            if (UIselectedSymbolID === x) {
+                collor = "red";
+            } else {
+                collor = "black";
+            }
+
+            Layout[x].RenderBoardLayoutItem(collor);
             //Layout[x].RenderLayoutPoints();
 
         }
@@ -976,7 +1013,12 @@ function renderLayout() {
     if (AplicationModeSetting === "Schematic") {
 
         for (x = 1; x <= MaxLayout; x++) {
-            Layout[x].RenderLayoutItem();
+            if (UIselectedSymbolID === x) {
+                collor = "red";
+            } else {
+                collor = "black";
+            }
+            Layout[x].RenderLayoutItem(collor);
             Layout[x].RenderLayoutPoints();
 
         }
@@ -1065,11 +1107,20 @@ function UIdisplayDevicesTable() {
 
             var bla = document.createElement("div");
 
-            var button = document.createElement("button");
-            button.innerHTML = "-";
-            button.id = x;
-            button.setAttribute("onClick", "Layout[" + x + "].remove();");
-            bla.appendChild(button);
+
+            if (AplicationModeSetting === "Board Layout") {
+
+            }
+
+
+            if (AplicationModeSetting === "Schematic") {
+                var button = document.createElement("button");
+                button.innerHTML = "-";
+                button.id = x;
+                button.setAttribute("onClick", "Layout[" + x + "].remove();");
+                bla.appendChild(button);
+            }
+
 
             var button = document.createElement("button");
             button.innerHTML = "Select";
@@ -1096,6 +1147,8 @@ function UIdisplayDevicesTable() {
 
 function UIdisplayConnectionTable() {
     document.getElementById("addPoint").style.display = "none";
+
+
     var table = document.getElementById("ConnectionTable");
     table.innerHTML = "";
     var row = table.insertRow(-1);
@@ -1116,11 +1169,20 @@ function UIdisplayConnectionTable() {
 
             var bla = document.createElement("div");
 
-            var button = document.createElement("button");
-            button.innerHTML = "-";
-            button.id = x;
-            button.setAttribute("onClick", "Connections[" + x + "].remove();");
-            bla.appendChild(button);
+
+            if (AplicationModeSetting === "Board Layout") {
+
+            }
+
+
+            if (AplicationModeSetting === "Schematic") {
+                var button = document.createElement("button");
+                button.innerHTML = "-";
+                button.id = x;
+                button.setAttribute("onClick", "Connections[" + x + "].remove();");
+                bla.appendChild(button);
+            }
+
 
             var button = document.createElement("button");
             button.innerHTML = "Select";
@@ -1266,3 +1328,4 @@ function removeDuplicates(arr) {
 }
 
 renderLayout();
+UIsetAplicationModeSetting();
