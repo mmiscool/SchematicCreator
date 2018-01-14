@@ -448,8 +448,8 @@ function UIloadStoredLayout() {
         Symbols[x].extend(BrowserStorage("Symbol", x, "Layout"));
         if (Symbols[x].Name !== "") {
             UIaddItemToSelect("SymbolListingForSelection", Symbols[x].Name, x);
-            Symbols[x].img.src = "../../../Storage/Symbols/" + x + '-Symbol.png';
-            Symbols[x].padsImg.src = "../../../Storage/Symbols/" + x + '-Pads.png';
+            Symbols[x].img.src = "../../../storage/symbols/" + x + '-Symbol.png';
+            Symbols[x].padsImg.src = "../../../storage/symbols/" + x + '-Pads.png';
         }
 
 
@@ -772,7 +772,7 @@ var UIsymbolToAdd = "";
 
 function UISymbolAdderSelectClick(thing) {
     UIsymbolToAdd = thing;
-    document.getElementById('SymbolPreviewImage').src = "../../../Storage/Symbols/" + UIsymbolToAdd + '-Symbol.png';
+    document.getElementById('SymbolPreviewImage').src = "../../../storage/symbols/" + UIsymbolToAdd + '-Symbol.png';
     UIaddSymbolButtonClick();
 }
 
