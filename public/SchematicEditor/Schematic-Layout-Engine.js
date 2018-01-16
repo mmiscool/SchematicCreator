@@ -130,12 +130,6 @@ function NetItem() {
     this.deviceID = 0;
     this.deviceRefDesignator = "";
     this.devicePinID = "";
-
-    this.netPoint = function () {
-        return Layout[this.deviceID].GivePadPointForPinID(this.devicePinID);
-    };
-
-
 }
 
 function CircuitSymbols() {
@@ -177,6 +171,9 @@ function CircuitConnections() {
 
     this.netID = undefined;
     this.linePoints = [];
+
+
+    console.log(this.linePoints);
 
 
     this.delete = function () {
@@ -246,7 +243,7 @@ function CircuitConnections() {
             olditem = item;
 
         });
-
+        console.log(collor);
         UIdrawLine(olditem, Layout[this.id2].GivePointForPinID(this.pin2), collor);
         return pointClicked;
 
@@ -384,10 +381,10 @@ function CircuitLayout() {
 
         pins = this.PinsListObject();
 
-
+        console.log(pins);
         for (var i = 0; i < pins.length; i++) {
             if (checkIfPointClickedHack != undefined) {
-
+                //console.log("my point" , checkIfPointClickedHack);
 
                 if (AplicationModeSetting === "Schematic") {
                     myTempppOint = this.SchematicSymbolPoint(pins[i]);
@@ -433,15 +430,6 @@ function CircuitLayout() {
         }
     };
 
-    this.GivePadPointForPinID = function (pinID) {
-        pins = this.PinsListObject();
-
-
-        for (var i = 0; i < pins.length; i++) {
-            if (pins[i].name === pinID) return this.PadsSymbolPoint(pins[i]);
-        }
-    };
-
     this.SchematicSymbolPoint = function (mypoint) {
 
 
@@ -471,17 +459,10 @@ function CircuitLayout() {
 
         }
 
+        mypoint.x += this.SchematicX;
+        mypoint.y += this.SchematicY;
 
-        myReturnPoint = new Point();
-
-        myReturnPoint.x = mypoint.x;
-        myReturnPoint.y = mypoint.y;
-
-        myReturnPoint.x += this.SchematicX;
-        myReturnPoint.y += this.SchematicY;
-
-
-        return myReturnPoint;
+        return mypoint;
 
     };
 
@@ -591,7 +572,7 @@ function UIloadStoredLayout() {
 
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x] = new CircuitConnections();
-
+        console.log(Connections[x].linePoints);
 
         Connections[x].extend(BrowserStorage("Schematic", x, "Connection"));
         blabla = new Point();
@@ -605,7 +586,7 @@ function UIloadStoredLayout() {
     if (BrowserStorage("Schematic", 1, "BoardLines") !== "") {
 
         tempBoardLayoutLines = JSON.parse(BrowserStorage("Schematic", 1, "BoardLines"));
-
+        console.log(tempBoardLayoutLines);
 
         tempBoardLayoutLines.forEach(function (item, index) {
             myTempLine = new Line();
@@ -753,7 +734,7 @@ canvas.addEventListener('mouseup', function (evt) {
     //exit current command on right click
     if (evt.button === 2) UIsetCurrentToolStatus("");
     mousePos = getMousePos(canvas, evt);
-
+    console.log(detextifdrag, mousePos);
     UIdragDetect = false;
 
     mouseClickMidpointOnDrag = new Point();
@@ -785,7 +766,7 @@ canvas.addEventListener('mouseup', function (evt) {
                 bla.point1 = point1;
                 bla.point2 = point2;
                 BoardLayoutLines.push(bla);
-
+                console.log(bla);
             }
             else {
                 UIsetCurrentToolStatus("moveSymbol");
@@ -892,13 +873,15 @@ canvas.addEventListener('mouseup', function (evt) {
 
             mouseClickMidpointOnDrag.x = (detextifdrag.x + mousePos.x) / 2;
             mouseClickMidpointOnDrag.y = (detextifdrag.y + mousePos.y) / 2;
-
+            console.log(mouseClickMidpointOnDrag);
 
             UIselectedConnectionID = CheckConnectionPointClick(detextifdrag);
 
             if (UIselectedConnectionID && UISelectedLinePoint !== false) {
                 Connections[UIselectedConnectionID].linePoints[UISelectedLinePoint] = mousePos;
-
+                UIsetCurrentToolStatus("");
+                renderLayout();
+                return;
             }
 
 
@@ -1220,7 +1203,7 @@ function renderLayout() {
                 collor = "black";
             }
 
-            if (Layout[x].SymbolID && Symbols[Layout[x].SymbolID].Name && Symbols[Layout[x].SymbolID].Name !== "JUNCTION") {
+            if (Layout[x].SymbolID && Symbols[Layout[x].SymbolID].Name && Symbols[Layout[x].SymbolID].Name !== "JUNCTION" ) {
                 Layout[x].RenderBoardLayoutItem(collor);
                 Layout[x].RenderLayoutPoints();
             }
@@ -1274,6 +1257,7 @@ function renderLayout() {
 
 
 }
+
 
 
 function BrowserStorageStore(type, id, field, contents) {
@@ -1455,22 +1439,8 @@ function UIdisplayNetListTable() {
 
 
         if (item.netItems) {
-            item.netItems.forEach(function (reallyTempNetItem) {
-                itemm = new NetItem();
-                itemm.deviceID = reallyTempNetItem.deviceID;
-                itemm.deviceRefDesignator = reallyTempNetItem.deviceRefDesignator;
-                itemm.devicePinID = reallyTempNetItem.devicePinID;
-                reallyTempNetItem = itemm;
-
-                bla += itemm.deviceRefDesignator + " / " + itemm.devicePinID + "<br>";
-                blabla = new Point();
-                blabla.collor = "yellow"
-                blabla.x = reallyTempNetItem.netPoint().x;
-                blabla.y = reallyTempNetItem.netPoint().x;
-
-
-                UIdrawPin(blabla, "blue");
-
+            item.netItems.forEach(function (item) {
+                bla += item.deviceRefDesignator + " / " + item.devicePinID + "<br>";
             });
         }
 
@@ -1483,8 +1453,6 @@ function UIdisplayNetListTable() {
 }
 
 function UIgenerateNetList() {
-
-
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x].netID = undefined;
     }
@@ -1553,7 +1521,7 @@ function UIgenerateNetList() {
 
     UIdisplayConnectionTable();
     UIdisplayNetListTable();
-
+    //console.log(NetList);
 }
 
 
@@ -1600,7 +1568,6 @@ function offsetLine(origLineFromCall, offset) {
 setTimeout(renderLayout, 3000);
 renderLayout();
 UIsetAplicationModeSetting();
-
 
 
 
