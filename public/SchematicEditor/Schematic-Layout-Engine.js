@@ -923,9 +923,6 @@ canvas.addEventListener('mouseup', function (evt) {
         }
 
 
-
-
-
         if (CurrentToolStatus === "addConnection") {
             if (Connections[UIselectedConnectionID].id1 === 0) {
                 bla = CheckLayoutSymbolPinClick(mousePos);
@@ -1204,8 +1201,11 @@ function renderLayout() {
                 collor = "black";
             }
 
-            Layout[x].RenderBoardLayoutItem(collor);
-            Layout[x].RenderLayoutPoints();
+            if (Layout[x].SymbolID && Symbols[Layout[x].SymbolID].Name && Symbols[Layout[x].SymbolID].Name !== "JUNCTION" ) {
+                Layout[x].RenderBoardLayoutItem(collor);
+                Layout[x].RenderLayoutPoints();
+            }
+
 
         }
 
@@ -1256,12 +1256,6 @@ function renderLayout() {
 
 }
 
-function renderBoardLayout() {
-
-
-
-    //renderLayoutItemPoints(UIselectedSymbolID);
-}
 
 
 function BrowserStorageStore(type, id, field, contents) {
