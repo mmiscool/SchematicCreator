@@ -10,12 +10,16 @@ var UIscale = .5;
 var UISelectedLinePoint;
 var AplicationModeSetting = "Schematic";
 
+var movePointsTogether = false;
+
+
 resolution = 20;
 
 Connections = [];
 Symbols = [];
 Layout = [];
 NetList = [];
+BoardLayoutLines = [];
 
 
 function UIsetAplicationModeSetting() {
@@ -66,7 +70,60 @@ function Point() {
     this.SetPoint = function (MyPointX, MyPointY) {
         this.x = MyPointX;
         this.y = MyPointY;
-    }
+    };
+
+
+    this.extend = function (jsonString) {
+
+        try {
+            var obj = JSON.parse(jsonString)
+            for (var key in obj) {
+                this[key] = obj[key]
+            }
+        } catch (e) {
+        }
+    };
+}
+
+
+function Line() {
+    this.point1 = new Point();
+    this.point2 = new Point();
+    this.netID = 0;
+    this.LineWidth = 5;
+
+    this.drawMe = function () {
+        UIdrawPin(this.point1);
+        UIdrawPin(this.point2);
+        UIdrawLine(this.point1, this.point2);
+
+    };
+
+    this.CheckIfClick = function (checkzPoint, NewPointLocationFromDrag) {
+        if (DetectIfPointClicked(checkzPoint, this.point1)) {
+            this.point1.x = NewPointLocationFromDrag.x;
+            this.point1.y = NewPointLocationFromDrag.y;
+
+            return 1;
+        }
+        if (DetectIfPointClicked(checkzPoint, this.point2)) {
+            this.point2.x = NewPointLocationFromDrag.x;
+            this.point2.y = NewPointLocationFromDrag.y;
+            return 2;
+        }
+    };
+
+    this.extend = function (jsonString) {
+
+        try {
+            var obj = JSON.parse(jsonString)
+            for (var key in obj) {
+                this[key] = obj[key]
+            }
+        } catch (e) {
+        }
+    };
+
 }
 
 function NetItem() {
@@ -80,8 +137,6 @@ function CircuitSymbols() {
         this.Name = "";
         this.ReferenceDesignator = " ";
         this.Points = "";
-        this.width = 0;
-        this.height = 0;
         this.img = new Image();
         this.padsImg = new Image();
         return "deleted";
@@ -161,7 +216,7 @@ function CircuitConnections() {
         if (collor === "undefined") collor = "black";
         if (this.id2 === 0) return false;
 
-        bla = Layout[this.id1].GivePointForPinID(this.pin1);
+        //bla = Layout[this.id1].GivePointForPinID(this.pin1);
 
 
         if (Layout[this.id1].GivePointForPinID(this.pin1) === undefined || Layout[this.id2].GivePointForPinID(this.pin2) === undefined) return;
@@ -255,8 +310,8 @@ function CircuitLayout() {
     this.DetectIfSymbolUnderXY = function (x, y) {
         if (this.SymbolID <= 0) return false;
 
-        wid = Symbols[this.SymbolID].width;
-        hei = Symbols[this.SymbolID].height;
+        wid = Symbols[this.SymbolID].img.width;
+        hei = Symbols[this.SymbolID].img.height;
 
         if (this.SchematicRotation == 90 || this.SchematicRotation == 90) [wid, hei] = [hei, wid];
 
@@ -322,29 +377,46 @@ function CircuitLayout() {
     };
 
     this.RenderLayoutPoints = function (checkIfPointClickedHack) {
-
-
         if (this.SymbolID <= 0) return;
-        UIeditMode = "Symbol";
-
 
         pins = this.PinsListObject();
 
-
+        console.log(pins);
         for (var i = 0; i < pins.length; i++) {
             if (checkIfPointClickedHack != undefined) {
                 //console.log("my point" , checkIfPointClickedHack);
-                myTempppOint = this.SchematicSymbolPoint(pins[i]);
+
+                if (AplicationModeSetting === "Schematic") {
+                    myTempppOint = this.SchematicSymbolPoint(pins[i]);
+                }
+
+                if (AplicationModeSetting === "Board Layout") {
+                    myTempppOint = this.PadsSymbolPoint(pins[i]);
+                }
 
 
                 if (DetectIfPointClicked(checkIfPointClickedHack, myTempppOint)) {
 
-                    console.log(this.SchematicSymbolPoint(pins[i].name));
-                    return this.SchematicSymbolPoint(pins[i].name);
+
+                    if (AplicationModeSetting === "Schematic") {
+                        return this.SchematicSymbolPoint(pins[i].name);
+                    }
+
+                    if (AplicationModeSetting === "Board Layout") {
+                        return this.PadsSymbolPoint(pins[i].name);
+                    }
                 }
 
             }
-            UIdrawPin(this.SchematicSymbolPoint(pins[i]));
+
+            if (AplicationModeSetting === "Schematic") {
+                UIdrawPin(this.SchematicSymbolPoint(pins[i]));
+            }
+
+            if (AplicationModeSetting === "Board Layout") {
+                UIdrawPin(this.PadsSymbolPoint(pins[i]));
+            }
+
         }
     };
 
@@ -360,34 +432,71 @@ function CircuitLayout() {
 
     this.SchematicSymbolPoint = function (mypoint) {
 
+
         if (Number(this.SchematicRotation) === 0) {
-            mypoint.x = mypoint.x - (Symbols[this.SymbolID].width / 2);
-            mypoint.y = mypoint.y - (Symbols[this.SymbolID].height / 2);
+            mypoint.x = mypoint.x - (Symbols[this.SymbolID].img.width / 2);
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].img.height / 2);
         }
 
 
         if (Number(this.SchematicRotation) === 180) {
-            mypoint.x = (Symbols[this.SymbolID].width / 2) - mypoint.x;
-            mypoint.y = (Symbols[this.SymbolID].height / 2) - mypoint.y;
+            mypoint.x = (Symbols[this.SymbolID].img.width / 2) - mypoint.x;
+            mypoint.y = (Symbols[this.SymbolID].img.height / 2) - mypoint.y;
         }
 
 
         if (Number(this.SchematicRotation) === 90) {
-            mypoint.x = mypoint.x - (Symbols[this.SymbolID].width / 2);
-            mypoint.y = (Symbols[this.SymbolID].height / 2) - mypoint.y;
+            mypoint.x = mypoint.x - (Symbols[this.SymbolID].img.width / 2);
+            mypoint.y = (Symbols[this.SymbolID].img.height / 2) - mypoint.y;
             [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
 
         }
 
         if (Number(this.SchematicRotation) === 270) {
-            mypoint.y = mypoint.y - (Symbols[this.SymbolID].height / 2);
-            mypoint.x = (Symbols[this.SymbolID].width / 2) - mypoint.x;
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].img.height / 2);
+            mypoint.x = (Symbols[this.SymbolID].img.width / 2) - mypoint.x;
             [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
 
         }
 
         mypoint.x += this.SchematicX;
         mypoint.y += this.SchematicY;
+
+        return mypoint;
+
+    };
+
+
+    this.PadsSymbolPoint = function (mypoint) {
+
+        if (Number(this.PadRotation) === 0) {
+            mypoint.x = mypoint.x - (Symbols[this.SymbolID].padsImg.width / 2);
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].padsImg.height / 2);
+        }
+
+
+        if (Number(this.PadRotation) === 180) {
+            mypoint.x = (Symbols[this.SymbolID].padsImg.width / 2) - mypoint.x;
+            mypoint.y = (Symbols[this.SymbolID].padsImg.height / 2) - mypoint.y;
+        }
+
+
+        if (Number(this.PadRotation) === 90) {
+            mypoint.x = mypoint.x - (Symbols[this.SymbolID].padsImg.width / 2);
+            mypoint.y = (Symbols[this.SymbolID].padsImg.height / 2) - mypoint.y;
+            [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
+
+        }
+
+        if (Number(this.PadRotation) === 270) {
+            mypoint.y = mypoint.y - (Symbols[this.SymbolID].padsImg.height / 2);
+            mypoint.x = (Symbols[this.SymbolID].padsImg.width / 2) - mypoint.x;
+            [mypoint.x, mypoint.y] = [mypoint.y, mypoint.x];
+
+        }
+
+        mypoint.x += this.PadX;
+        mypoint.y += this.PadY;
 
         return mypoint;
 
@@ -401,19 +510,25 @@ function CircuitLayout() {
 
         for (i = 0; i < pins.length; i++) {
             var bla = new Point();
+            pins[i] = pins[i] + "|";
             bla.name = pins[i].split('|')[0];
-            if (UIeditMode === "Symbol") {
-                bla.x = pins[i].split('|')[1];
-                bla.y = pins[i].split('|')[2];
-                ListOfPoints.push(bla);
+            if (bla.name != "" && bla.name != undefined) {
+                if (AplicationModeSetting === "Schematic") {
+                    bla.x = pins[i].split('|')[1];
+                    bla.y = pins[i].split('|')[2];
+                    ListOfPoints.push(bla);
 
+
+                }
+
+                if (AplicationModeSetting === "Board Layout") {
+                    bla.x = Number(pins[i].split('|')[3]);
+                    bla.y = Number(pins[i].split('|')[4]);
+                    ListOfPoints.push(bla);
+
+                }
             }
 
-            if (UIeditMode === "Pads") {
-                bla.x = pins[i].split('|')[3];
-                bla.y = pins[i].split('|')[4];
-                ListOfPoints.push(bla);
-            }
         }
 
         return ListOfPoints;
@@ -468,6 +583,23 @@ function UIloadStoredLayout() {
         Layout[x] = new CircuitLayout();
         Layout[x].extend(BrowserStorage("Schematic", x, "Layout"));
     }
+    if (BrowserStorage("Schematic", 1, "BoardLines") !== "") {
+
+        tempBoardLayoutLines = JSON.parse(BrowserStorage("Schematic", 1, "BoardLines"));
+        console.log(tempBoardLayoutLines);
+
+        tempBoardLayoutLines.forEach(function (item, index) {
+            myTempLine = new Line();
+            myTempLine.point1.x = item.point1.x;
+            myTempLine.point1.y = item.point1.y;
+            myTempLine.point2.x = item.point2.x;
+            myTempLine.point2.y = item.point2.y;
+
+
+            BoardLayoutLines.push(myTempLine);
+        });
+    }
+
 }
 
 
@@ -480,6 +612,10 @@ function UIsaveStoredLayout() {
     for (x = 1; x <= MaxLayout; x++) {
         BrowserStorageStore("Schematic", x, "Layout", JSON.stringify(Layout[x]));
     }
+
+    BrowserStorageStore("Schematic", 1, "BoardLines", JSON.stringify(BoardLayoutLines));
+
+
 }
 
 
@@ -581,6 +717,11 @@ canvas.addEventListener('selectstart', function (e) {
 var detextifdrag = new Object();
 
 canvas.addEventListener('mousedown', function (evt) {
+    if (AplicationModeSetting === "Draw Rectangles") {
+        UIBoardLayoutEngineMouseDown(evt);
+
+    }
+
     detextifdrag = getMousePos(canvas, evt);
 });
 
@@ -594,11 +735,12 @@ canvas.addEventListener('mouseup', function (evt) {
     if (evt.button === 2) UIsetCurrentToolStatus("");
     mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
-    UIdragDetect = true;
+    UIdragDetect = false;
 
     mouseClickMidpointOnDrag = new Point();
 
     if (AplicationModeSetting === "Board Layout") {
+
 
         //UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
         UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
@@ -606,10 +748,61 @@ canvas.addEventListener('mouseup', function (evt) {
 
         if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
             UIdragDetect = true;
+
+
+            if (CurrentToolStatus === "Add Board Line") {
+                bla = new Line();
+
+                point1 = new Point();
+                point2 = new Point();
+
+                point1.x = detextifdrag.x;
+                point1.y = detextifdrag.y;
+
+                point2.x = mousePos.x;
+                point2.y = mousePos.y;
+
+
+                bla.point1 = point1;
+                bla.point2 = point2;
+                BoardLayoutLines.push(bla);
+                console.log(bla);
+            }
+            else {
+                UIsetCurrentToolStatus("moveSymbol");
+
+                //detect if line point clicked and move it.
+
+                if (movePointsTogether) {
+                    BoardLayoutLines.forEach(function (item, index) {
+                        bla = item.CheckIfClick(detextifdrag, mousePos);
+
+                        if (bla > 0) {
+                            UIsetCurrentToolStatus("");
+                            return true;
+                        }
+                        //if (bla) alert(index + "  "+bla);
+                    });
+                }
+                else {
+                    BoardLayoutLines.some(function (item, index) {
+                        bla = item.CheckIfClick(detextifdrag, mousePos);
+
+                        if (bla > 0) {
+                            UIsetCurrentToolStatus("");
+                            return true;
+                        }
+                        //if (bla) alert(index + "  "+bla);
+                    });
+                }
+
+
+            }
+
+
             detextifdrag.x = mousePos.x - detextifdrag.x;
             detextifdrag.y = mousePos.y - detextifdrag.y;
 
-            UIsetCurrentToolStatus("moveSymbol");
         }
 
 
@@ -628,6 +821,8 @@ canvas.addEventListener('mouseup', function (evt) {
             }
 
         }
+
+
     }
 
 
@@ -645,6 +840,32 @@ canvas.addEventListener('mouseup', function (evt) {
         UIselectedConnectionID = CheckConnectionPointClick(mousePos);
 
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
+
+        if (CurrentToolStatus === "addSymbol") {
+            UIselectedSymbolID = "";
+
+            for (x = 1; x <= MaxLayout; x++) {
+
+                if (Layout[x].SymbolID === 0) {
+
+                    UIselectedSymbolID = x;
+                    Layout[x].SymbolID = UIsymbolToAdd;
+                    Layout[x].ReferenceDesignator = Symbols[UIsymbolToAdd].ReferenceDesignator + x;
+
+
+                    Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
+                    UIshowSymbolLayoutInfo(UIselectedSymbolID);
+                    UIsetCurrentToolStatus("symbolPic");
+
+                    break;
+                }
+
+            }
+
+
+            UIshowSymbolLayoutInfo(UIselectedSymbolID);
+            UIsetCurrentToolStatus("symbolPic");
+        }
 
 
         if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
@@ -702,31 +923,7 @@ canvas.addEventListener('mouseup', function (evt) {
         }
 
 
-        if (CurrentToolStatus === "addSymbol") {
-            UIselectedSymbolID = "";
 
-            for (x = 1; x <= MaxLayout; x++) {
-
-                if (Layout[x].SymbolID === 0) {
-
-                    UIselectedSymbolID = x;
-                    Layout[x].SymbolID = UIsymbolToAdd;
-                    Layout[x].ReferenceDesignator = Symbols[UIsymbolToAdd].ReferenceDesignator + x;
-
-
-                    Layout[UIselectedSymbolID].moveSymbol(mousePos.x, mousePos.y);
-                    UIshowSymbolLayoutInfo(UIselectedSymbolID);
-                    UIsetCurrentToolStatus("symbolPic");
-
-                    break;
-                }
-
-            }
-
-
-            UIshowSymbolLayoutInfo(UIselectedSymbolID);
-            UIsetCurrentToolStatus("symbolPic");
-        }
 
 
         if (CurrentToolStatus === "addConnection") {
@@ -941,11 +1138,15 @@ function CheckConnectionPointClick(myMousePos) {
 
 function UIdrawPin(point) {
     if (!point.x) return;
+
+    context.globalCompositeOperation = "destination-over";
     context.beginPath();
     context.arc(point.x, point.y, 20, 0, 2 * Math.PI, false);
     context.fillStyle = point.collor;
     context.fill();
     context.closePath();
+    context.globalCompositeOperation = "source-over";
+
 }
 
 function UIdrawLine(point1, point2, collor) {
@@ -957,6 +1158,7 @@ function UIdrawLine(point1, point2, collor) {
     } else {
         context.strokeStyle = collor;
     }
+    context.lineCap = "round";
     context.moveTo(Number(point1.x), Number(point1.y));
     context.lineTo(Number(point2.x), Number(point2.y));
     context.stroke();
@@ -1003,9 +1205,19 @@ function renderLayout() {
             }
 
             Layout[x].RenderBoardLayoutItem(collor);
-            //Layout[x].RenderLayoutPoints();
+            Layout[x].RenderLayoutPoints();
 
         }
+
+
+        oldBoardLayoutLines = BoardLayoutLines;
+
+
+        BoardLayoutLines.forEach(function (item, index) {
+            item.drawMe();
+        });
+        BoardLayoutLines = oldBoardLayoutLines;
+
         UIdisplayDevicesTable();
     }
 
@@ -1317,15 +1529,51 @@ function UIgenerateNetList() {
 }
 
 
-function removeDuplicates(arr) {
-    let unique_array = []
-    for (let i = 0; i < arr.length; i++) {
-        if (unique_array.indexOf(arr[i]) == -1) {
-            unique_array.push(arr[i])
-        }
+function offsetLine(origLineFromCall, offset) {
+    x1 = origLineFromCall.point1.x;
+    y1 = origLineFromCall.point1.y;
+    x2 = origLineFromCall.point2.x;
+    y2 = origLineFromCall.point2.y;
+
+    function sq(a) {
+        return a * a;
     }
-    return unique_array
+
+    length = Math.sqrt(sq(x2 - x1) + sq(y2 - y1));
+
+    offX = -(y2 - y1) / length * offset;
+    offY = (x2 - x1) / length * offset;
+
+    x1 += offX;
+    y1 += offY;
+    x2 += offX;
+    y2 += offY;
+
+
+    myNewLine = new Line();
+    myNewPoint1 = new Point();
+    myNewPoint2 = new Point();
+
+    myNewPoint1.x = x1;
+    myNewPoint1.y = y1;
+    myNewPoint2.x = x2;
+    myNewPoint2.y = y2;
+
+
+    myNewLine.point1 = myNewPoint1;
+
+    myNewLine.point2 = myNewPoint2;
+
+
+    return myNewLine;
+
 }
 
+setTimeout(renderLayout, 3000);
 renderLayout();
 UIsetAplicationModeSetting();
+
+
+
+
+

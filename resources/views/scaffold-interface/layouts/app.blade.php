@@ -110,8 +110,22 @@
 						<li class="header">MAIN NAVIGATION</li>
 						<li class="active treeview">
 							<a href="{{url('scaffold-dashboard')}}">
-								<i class="fa fa-dashboard"></i> <span>Dashboard</span></i>
+								<i class="fa fa-dashboard"></i> <span>Dashboard</span>
 							</a>
+						</li>
+						<li class="active treeview">
+							<a href="{{url('schematiccreatorsymbol')}}">
+								<i class="fa fa-file-image-o"></i><span>Symbols</span>
+							</a>
+						</li>
+						<li class="active treeview">
+							<a href="{{url('schematiccreatorlayout')}}">
+								<i class="fa fa-pencil-square-o"></i> <span>Scematic Creator</span>
+							</a>
+						</li>
+
+
+
 						</li>
 						<li class="header">ADMINISTRATOR</li>
 						<li class="treeview"><a href="{{url('/scaffold-users')}}"><i class="fa fa-users"></i> <span>Users</span></a></li>

@@ -21,6 +21,15 @@
         </button>
 
         <span name="Board Layout">
+            <button id="Add Board Line" onclick="UIsetCurrentToolStatus('Add Board Line');">
+                Add Line
+            </button>
+
+
+           <input type="checkbox" id="movePointsTogether" onclick="movePointsTogether =this.checked;">
+          <label for="movePointsTogether">Select Multiple Points</label>
+
+
             <span id="PadsLayoutRotateButtons" style="display: none">
                 <button value="<" onclick="UIsymbolLayoutButtonClick('rotate left');">
                     <i class="fa fa-undo" aria-hidden="true"></i>
@@ -60,9 +69,9 @@
 
 
         </div>
-        <div class="middle">
+        <div class="middle" style=" cursor: url('crosshair.png'), crosshair;">
 
-            <canvas id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;">
+            <canvas id="myCanvas" width="5000" height="5000" style="width:5000px;height:5000px;  ">
                 Your browser does not support the HTML5 canvas tag.
             </canvas>
 

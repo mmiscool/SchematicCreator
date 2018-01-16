@@ -125,7 +125,7 @@ function UIDrawPins() {
 
     var TotalPinListing = "";
     for (i = 0; i < pins.length; i++) {
-        TotalPinListing += pins.options[i].text + '\n'
+        TotalPinListing += pins.options[i].text + '\n';
 
         if (UIeditMode === "Symbol") {
             PinX = pins.options[i].text.split('|')[1];
