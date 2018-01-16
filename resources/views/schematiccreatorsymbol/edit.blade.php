@@ -18,7 +18,7 @@
                             Schematiccreatorsymbol Index</a>
                         <br>
                         <form method='POST' action='{!! url("schematiccreatorsymbol")!!}/{!!$schematiccreatorsymbol->
-        id!!}/update'>
+        id!!}/update'  enctype="multipart/form-data" >
                             <input type='hidden' name='_token' value='{{Session::token()}}'>
 
                                 <label for="name">name</label>
@@ -40,6 +40,11 @@
                                 <input id="ExtraAtributes" name="ExtraAtributes" type="text" class="form-control"
                                        value="{!!$schematiccreatorsymbol->
             ExtraAtributes!!}">
+
+
+                                <input type="file" id="upload1"  name="upload1" accept=".png">
+
+                                <input type="file" id="upload2"  name="upload2" accept=".png">
                             </div>
                             <button class='btn btn-success' type='submit'><i class="fa fa-floppy-o"></i> Update</button>
                         </form>

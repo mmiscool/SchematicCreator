@@ -69,7 +69,13 @@ class SchematiccreatorsymbolController extends Controller
         $schematiccreatorsymbol->save();
       //  dd($request->hasFile('upload'));
 
-        $request->upload->storeAs('public/symbols', $schematiccreatorsymbol->id . "-Symbol.png");
+        if ($request->hasFile('upload1')) {
+            $request->upload1->storeAs('public/symbols', $schematiccreatorsymbol->id . "-Symbol.png");
+        }
+
+        if ($request->hasFile('upload2')) {
+            $request->upload2->storeAs('public/symbols', $schematiccreatorsymbol->id . "-Pads.png");
+        }
 
         return redirect('schematiccreatorsymbol/'.$schematiccreatorsymbol->id.'/edit/');
     }
@@ -134,6 +140,17 @@ class SchematiccreatorsymbolController extends Controller
         
         
         $schematiccreatorsymbol->save();
+
+
+        if ($request->upload1) {
+
+            $request->upload1->storeAs('public/symbols', $schematiccreatorsymbol->id . "-Symbol.png");
+        }
+
+        if ($request->upload2) {
+
+            $request->upload2->storeAs('public/symbols', $schematiccreatorsymbol->id . "-Pads.png");
+        }
 
         return redirect('schematiccreatorsymbol/'.$schematiccreatorsymbol->id.'/edit/');
     }

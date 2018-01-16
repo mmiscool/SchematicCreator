@@ -831,7 +831,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
 
         if (CurrentToolStatus === "AddLinePoint") {
-            Connections[UIselectedConnectionID].AddLinePoin(mousePos)
+            Connections[UIselectedConnectionID].AddLinePoin(mousePos);
             UIsetCurrentToolStatus("");
         }
 
@@ -888,7 +888,7 @@ canvas.addEventListener('mouseup', function (evt) {
                 UIaddConnectionButtonClick();
                 Connections[UIselectedConnectionID].id1 = bla.id;
                 Connections[UIselectedConnectionID].pin1 = bla.pin;
-                CurrentToolStatus = "addConnection";
+                UIsetCurrentToolStatus("addConnection");
 
 
             }
@@ -1040,7 +1040,7 @@ function UIsymbolLayoutButtonClick(ActionToBeTaken) {
 
 
         if (ActionToBeTaken == "delete") {
-            Layout[UIselectedSymbolID].delete()
+            Layout[UIselectedSymbolID].delete();
             renderLayout();
             UIshowSymbolLayoutInfo(UIselectedSymbolID);
         }

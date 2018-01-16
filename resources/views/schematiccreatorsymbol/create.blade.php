@@ -27,7 +27,9 @@
             <input id="ExtraAtributes" name = "ExtraAtributes" type="text" class="form-control">
         </div>
 
-        <input type="file" id="upload"  name="upload" accept=".png">
+        <input type="file" id="upload1"  name="upload1" accept=".png">
+
+        <input type="file" id="upload2"  name="upload2" accept=".png">
 
         <button class = 'btn btn-success' type ='submit'> <i class="fa fa-floppy-o"></i> Save</button>
     </form>
