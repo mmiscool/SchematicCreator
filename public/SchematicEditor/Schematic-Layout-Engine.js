@@ -8,6 +8,7 @@ var UIselectedConnectionID;
 var UIscale = .5;
 
 var UISelectedLinePoint;
+var UISelectedBoardLayoutNet;
 var AplicationModeSetting = "Schematic";
 
 var movePointsTogether = false;
@@ -83,6 +84,40 @@ function Point() {
         } catch (e) {
         }
     };
+}
+
+
+function boardLayoutPointsManager() {
+    this.BoardLayoutPoints = [];
+
+
+    this.AssignPoint = function (inputPoint, inputPointName) {
+        myTempPoint = new Point();
+
+        myTempPoint.x = inputPoint.x;
+        myTempPoint.y = inputPoint.y;
+
+        myTempPoint.name = inputPointName;
+
+        myTempPoint.collor = "yellow";
+        this.BoardLayoutPoints.push(myTempPoint);
+
+
+    };
+
+
+
+
+
+    this.RenderThePoints = function () {
+        this.BoardLayoutPoints.forEach(function (element) {
+            if (UISelectedBoardLayoutNet === element.name) element.collor = "blue";
+            UIdrawPoint(element);
+        });
+
+    };
+
+
 }
 
 
@@ -173,9 +208,6 @@ function CircuitConnections() {
     this.linePoints = [];
 
 
-    console.log(this.linePoints);
-
-
     this.delete = function () {
         this.id1 = 0;
         this.pin1 = "";
@@ -243,7 +275,7 @@ function CircuitConnections() {
             olditem = item;
 
         });
-        console.log(collor);
+
         UIdrawLine(olditem, Layout[this.id2].GivePointForPinID(this.pin2), collor);
         return pointClicked;
 
@@ -381,7 +413,7 @@ function CircuitLayout() {
 
         pins = this.PinsListObject();
 
-        console.log(pins);
+
         for (var i = 0; i < pins.length; i++) {
             if (checkIfPointClickedHack != undefined) {
                 //console.log("my point" , checkIfPointClickedHack);
@@ -424,13 +456,16 @@ function CircuitLayout() {
     this.GivePointForPinID = function (pinID) {
         pins = this.PinsListObject();
 
-
         for (var i = 0; i < pins.length; i++) {
             if (pins[i].name === pinID) return this.SchematicSymbolPoint(pins[i]);
         }
     };
 
     this.SchematicSymbolPoint = function (mypoint) {
+
+        if (AplicationModeSetting === "Board Layout") {
+            return this.PadsSymbolPoint(mypoint);
+        }
 
 
         if (Number(this.SchematicRotation) === 0) {
@@ -572,7 +607,7 @@ function UIloadStoredLayout() {
 
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x] = new CircuitConnections();
-        console.log(Connections[x].linePoints);
+
 
         Connections[x].extend(BrowserStorage("Schematic", x, "Connection"));
         blabla = new Point();
@@ -586,7 +621,7 @@ function UIloadStoredLayout() {
     if (BrowserStorage("Schematic", 1, "BoardLines") !== "") {
 
         tempBoardLayoutLines = JSON.parse(BrowserStorage("Schematic", 1, "BoardLines"));
-        console.log(tempBoardLayoutLines);
+
 
         tempBoardLayoutLines.forEach(function (item, index) {
             myTempLine = new Line();
@@ -622,10 +657,12 @@ function UIsaveStoredLayout() {
 UIloadStoredLayout();
 
 
-function DetectIfPointClicked(pontA, pointB) {
+function DetectIfPointClicked(pontA, pointB, myresolution) {
+     var myresolution = myresolution || resolution ;
+
     if (
-        Number(pontA.x) <= pointB.x + resolution && Number(pontA.x) >= pointB.x - resolution &&
-        Number(pontA.y) <= pointB.y + resolution && Number(pontA.y) >= pointB.y - resolution
+        Number(pontA.x) <= pointB.x + myresolution && Number(pontA.x) >= pointB.x - myresolution &&
+        Number(pontA.y) <= pointB.y + myresolution && Number(pontA.y) >= pointB.y - myresolution
 
     ) {
         return true;
@@ -1148,6 +1185,18 @@ function UIdrawPin(point) {
 
 }
 
+function UIdrawPoint(point) {
+    if (!point.x) return;
+
+    context.beginPath();
+    context.arc(point.x, point.y, 20, 0, 2 * Math.PI, false);
+    context.fillStyle = point.collor;
+    context.fill();
+    context.closePath();
+
+
+}
+
 function UIdrawLine(point1, point2, collor) {
 
     context.lineWidth = 10;
@@ -1203,7 +1252,7 @@ function renderLayout() {
                 collor = "black";
             }
 
-            if (Layout[x].SymbolID && Symbols[Layout[x].SymbolID].Name && Symbols[Layout[x].SymbolID].Name !== "JUNCTION" ) {
+            if (Layout[x].SymbolID && Symbols[Layout[x].SymbolID].Name && Symbols[Layout[x].SymbolID].Name !== "JUNCTION") {
                 Layout[x].RenderBoardLayoutItem(collor);
                 Layout[x].RenderLayoutPoints();
             }
@@ -1221,6 +1270,7 @@ function renderLayout() {
         BoardLayoutLines = oldBoardLayoutLines;
 
         UIdisplayDevicesTable();
+        UIgenerateNetList();
     }
 
 
@@ -1257,7 +1307,6 @@ function renderLayout() {
 
 
 }
-
 
 
 function BrowserStorageStore(type, id, field, contents) {
@@ -1419,43 +1468,75 @@ function UIdisplayConnectionTable() {
 
 }
 
+allMyBoardLayoutPoints = new boardLayoutPointsManager();
+
 
 function UIdisplayNetListTable() {
+
 
     var table = document.getElementById("NetListTable");
     table.innerHTML = "";
     var row = table.insertRow(-1);
 
-
-    row.insertCell(0).innerHTML = "Net ID";
-    row.insertCell(1).innerHTML = "Devices / Pin";
+    row.insertCell(0).innerHTML = "Action";
+    row.insertCell(1).innerHTML = "Net ID";
+    row.insertCell(2).innerHTML = "Devices / Pin";
     i = 0;
 
     NetList.forEach(function (item, index) {
         i++;
         var row = table.insertRow(-1);
-        row.insertCell(0).innerHTML = item.netID;
+
+        var bla = document.createElement("div");
+        var button = document.createElement("button");
+        button.innerHTML = "Select";
+        button.id = x;
+        button.setAttribute("onClick", "UISelectedBoardLayoutNet =" + item.netID + ";renderLayout();");
+        bla.appendChild(button);
+        row.insertCell(0).appendChild(bla);
+
+
+        row.insertCell(1).innerHTML = item.netID;
         bla = "";
 
+        myCurrentNetId = item.netID;
 
         if (item.netItems) {
             item.netItems.forEach(function (item) {
                 bla += item.deviceRefDesignator + " / " + item.devicePinID + "<br>";
+                allMyBoardLayoutPoints.AssignPoint(Layout[item.deviceID].GivePointForPinID(item.devicePinID), myCurrentNetId);
             });
         }
 
 
-        row.insertCell(1).innerHTML = bla;
+        row.insertCell(2).innerHTML = bla;
+
+
+        if (UISelectedBoardLayoutNet === item.netID) {
+            row.style.backgroundColor = "red";
+            document.getElementById("addPoint").style.display = "";
+            row.scrollIntoView(false);
+        }
 
     });
 
+    console.log(allMyBoardLayoutPoints);
+    allMyBoardLayoutPoints.RenderThePoints();
 
 }
+
 
 function UIgenerateNetList() {
     for (x = 1; x <= MaxConnections; x++) {
         Connections[x].netID = undefined;
     }
+    NetList = [];
+    //BoardLayoutLines = [];
+    //allMyBoardLayoutPoints.length = 0;
+    allMyBoardLayoutPoints = undefined;
+    allMyBoardLayoutPoints = new boardLayoutPointsManager();
+
+    var allMyBoardLayoutPoints = new boardLayoutPointsManager();
 
     netIdsCounter = 0;
     for (i = 1; i <= MaxConnections; i++) {
@@ -1524,6 +1605,11 @@ function UIgenerateNetList() {
     //console.log(NetList);
 }
 
+
+function UIBoardCheckLayout()
+{
+    alert("checking layout");
+}
 
 function offsetLine(origLineFromCall, offset) {
     x1 = origLineFromCall.point1.x;

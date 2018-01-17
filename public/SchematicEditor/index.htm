@@ -13,7 +13,6 @@
 
         <input type="range" id="zoom" step=".1" min=".1" max="1.5" onchange="UIupdateZoom()"
                value=".5">
-        <button value="Generate Nets" id="GenNets" onclick="UIgenerateNetList();">Generate Nets</button>
 
 
         <button name="Schematic" value="Add. Point" id="addPoint" onclick="UIsetCurrentToolStatus('AddLinePoint');"
@@ -21,6 +20,8 @@
         </button>
 
         <span name="Board Layout">
+            <button value="Check Board" id="Check Board" onclick="UIBoardCheckLayout();">Check Board</button>
+
             <button id="Add Board Line" onclick="UIsetCurrentToolStatus('Add Board Line');">
                 Add Line
             </button>
