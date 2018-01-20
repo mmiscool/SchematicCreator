@@ -106,14 +106,18 @@ function boardLayoutPointsManager() {
     };
 
 
-
-
-
     this.RenderThePoints = function () {
         this.BoardLayoutPoints.forEach(function (element) {
             if (UISelectedBoardLayoutNet === element.name) element.collor = "blue";
             UIdrawPoint(element);
         });
+
+    };
+
+
+    this.DeleteThePoints = function () {
+        delete this.BoardLayoutPoints;
+        this.BoardLayoutPoints = [];
 
     };
 
@@ -130,7 +134,7 @@ function Line() {
     this.drawMe = function () {
         UIdrawPin(this.point1);
         UIdrawPin(this.point2);
-        UIdrawLine(this.point1, this.point2);
+        UIdrawLine(this.point1, this.point2,this.collor);
 
     };
 
@@ -658,7 +662,7 @@ UIloadStoredLayout();
 
 
 function DetectIfPointClicked(pontA, pointB, myresolution) {
-     var myresolution = myresolution || resolution ;
+    var myresolution = myresolution || resolution;
 
     if (
         Number(pontA.x) <= pointB.x + myresolution && Number(pontA.x) >= pointB.x - myresolution &&
@@ -1206,7 +1210,7 @@ function UIdrawLine(point1, point2, collor) {
     } else {
         context.strokeStyle = collor;
     }
-    context.lineCap = "round";
+    //context.lineCap = "round";
     context.moveTo(Number(point1.x), Number(point1.y));
     context.lineTo(Number(point2.x), Number(point2.y));
     context.stroke();
@@ -1265,6 +1269,10 @@ function renderLayout() {
 
 
         BoardLayoutLines.forEach(function (item, index) {
+            if (item.netID === UISelectedBoardLayoutNet) {
+                item.collor = "red"
+            }else
+            {item.collor = "black"}
             item.drawMe();
         });
         BoardLayoutLines = oldBoardLayoutLines;
@@ -1533,10 +1541,10 @@ function UIgenerateNetList() {
     NetList = [];
     //BoardLayoutLines = [];
     //allMyBoardLayoutPoints.length = 0;
-    allMyBoardLayoutPoints = undefined;
+    delete allMyBoardLayoutPoints;
+
     allMyBoardLayoutPoints = new boardLayoutPointsManager();
 
-    var allMyBoardLayoutPoints = new boardLayoutPointsManager();
 
     netIdsCounter = 0;
     for (i = 1; i <= MaxConnections; i++) {
@@ -1606,16 +1614,59 @@ function UIgenerateNetList() {
 }
 
 
-function UIBoardCheckLayout()
-{
-    alert("checking layout");
+function UIBoardCheckLayout() {
+    console.log(BoardLayoutLines);
+    result = "success"
+
+// clear the net ids from all the lines
+    BoardLayoutLines.forEach(function (itemB, indexB) {
+        itemB.netID = undefined;
+    });
+
+
+    allMyBoardLayoutPoints.BoardLayoutPoints.forEach(function (elementA, indexA) {
+        BoardLayoutLines.forEach(function (itemB, indexB) {
+            if (LineWithWidthIntersectionWithPadDetection(elementA, itemB)) {
+                if (itemB.netID === 0 || itemB.netID === undefined) itemB.netID = elementA.name;
+                if (itemB.netID !== elementA.name) {
+                    alert(itemB.netID + "!==" + elementA.name);
+                    result = "failure";
+                    return false;
+
+                }
+            }
+        });
+    });
+
+
+    BoardLayoutLines.forEach(function (itemA, indexA) {
+
+
+        BoardLayoutLines.forEach(function (itemB, indexB) {
+            if (LineWithWidthIntersectionDetection(itemA, itemB)) {
+                if (itemB.netID === 0 || itemB.netID === undefined) itemB.netID = itemA.netID;
+                if (itemB.netID !== itemA.netID) {
+                    alert(itemB.netID + "!==" + itemA.netID);
+                    result = "failure";
+                    return false;
+
+                }
+            }
+        });
+
+    });
+
+
+    alert(result);
+
 }
 
 function offsetLine(origLineFromCall, offset) {
-    x1 = origLineFromCall.point1.x;
-    y1 = origLineFromCall.point1.y;
-    x2 = origLineFromCall.point2.x;
-    y2 = origLineFromCall.point2.y;
+    x1 = Number(origLineFromCall.point1.x);
+    y1 = Number(origLineFromCall.point1.y);
+    x2 = Number(origLineFromCall.point2.x);
+    y2 = Number(origLineFromCall.point2.y);
+
 
     function sq(a) {
         return a * a;
@@ -1636,10 +1687,10 @@ function offsetLine(origLineFromCall, offset) {
     myNewPoint1 = new Point();
     myNewPoint2 = new Point();
 
-    myNewPoint1.x = x1;
-    myNewPoint1.y = y1;
-    myNewPoint2.x = x2;
-    myNewPoint2.y = y2;
+    myNewPoint1.x = Number(x1);
+    myNewPoint1.y = Number(y1);
+    myNewPoint2.x = Number(x2);
+    myNewPoint2.y = Number(y2);
 
 
     myNewLine.point1 = myNewPoint1;
@@ -1647,8 +1698,171 @@ function offsetLine(origLineFromCall, offset) {
     myNewLine.point2 = myNewPoint2;
 
 
+    console.log(myNewLine);
     return myNewLine;
 
+}
+
+function LineWithWidthIntersectionWithPadDetection(point1, line2) {
+
+    PadSizeCheck = 20;
+
+
+    lineA = [];
+    lineA[1] = new Line();
+    lineA[1].point1.x = point1.x + PadSizeCheck;
+    lineA[1].point1.y = point1.y + PadSizeCheck;
+
+    lineA[1].point2.x = point1.x - PadSizeCheck;
+    lineA[1].point2.y = point1.y + PadSizeCheck;
+
+    lineA[2] = new Line();
+
+    lineA[2].point1.x = point1.x + PadSizeCheck;
+    lineA[2].point1.y = point1.y - PadSizeCheck;
+
+    lineA[2].point2.x = point1.x - PadSizeCheck;
+    lineA[2].point2.y = point1.y - PadSizeCheck;
+
+
+    lineA[3] = new Line();
+    lineA[3].point1 = lineA[1].point1;
+    lineA[3].point2 = lineA[2].point1;
+
+
+    lineA[4] = new Line();
+    lineA[4].point1 = lineA[1].point2;
+    lineA[4].point2 = lineA[2].point2;
+
+
+    lineB = [];
+    lineB[1] = offsetLine(line2, line2.LineWidth * 2);
+    lineB[2] = offsetLine(line2, -(line2.LineWidth * 2));
+
+    lineB[3] = new Line();
+    lineB[3].point1 = lineB[1].point1;
+    lineB[3].point2 = lineB[2].point1;
+
+    lineB[4] = new Line();
+    lineB[4].point1 = lineB[1].point2;
+    lineB[4].point2 = lineB[2].point2;
+
+
+    //console.log(lineA, lineB)
+
+    found = 0;
+
+    lineA.forEach(function (elementA, indexA) {
+        //console.log(elementA);
+        if (found > 0) return;
+
+        if (indexA > 0) {
+            lineB.forEach(function (elementB, indexB) {
+                //console.log(elementB);
+                if (indexB > 0) {
+                    UIdrawLine(elementA.point1, elementA.point2);
+                    UIdrawLine(elementB.point1, elementB.point2);
+                    console.log(elementA, elementB);
+                    if (isIntersectingLines(elementA, elementB) == 1) {
+                        found += 1;
+                        return false
+                    }
+                    ;
+                }
+
+            });
+        }
+
+    });
+
+    return found;
+}
+
+
+function LineWithWidthIntersectionDetection(line1, line2) {
+    console.log(line1, line2);
+
+
+    lineA = [];
+    lineA[1] = offsetLine(line1, line1.LineWidth * 2);
+    lineA[2] = offsetLine(line1, -(line1.LineWidth * 2));
+
+    lineA[3] = new Line();
+    lineA[3].point1 = lineA[1].point1;
+    lineA[3].point2 = lineA[2].point1;
+
+    lineA[4] = new Line();
+    lineA[4].point1 = lineA[1].point2;
+    lineA[4].point2 = lineA[2].point2;
+
+
+    lineB = [];
+    lineB[1] = offsetLine(line2, line2.LineWidth * 2);
+    lineB[2] = offsetLine(line2, -(line2.LineWidth * 2));
+
+    lineB[3] = new Line();
+    lineB[3].point1 = lineB[1].point1;
+    lineB[3].point2 = lineB[2].point1;
+
+    lineB[4] = new Line();
+    lineB[4].point1 = lineB[1].point2;
+    lineB[4].point2 = lineB[2].point2;
+
+
+    //console.log(lineA, lineB)
+
+    found = 0;
+
+    lineA.forEach(function (elementA, indexA) {
+        //console.log(elementA);
+        if (found > 0) return;
+
+        if (indexA > 0) {
+            lineB.forEach(function (elementB, indexB) {
+                //console.log(elementB);
+                if (indexB > 0) {
+                    UIdrawLine(elementA.point1, elementA.point2);
+                    UIdrawLine(elementB.point1, elementB.point2);
+                    console.log(elementA, elementB);
+                    if (isIntersectingLines(elementA, elementB) == 1) {
+                        found += 1;
+                        return false
+                    }
+                    ;
+                }
+
+            });
+        }
+
+    });
+
+    return found;
+}
+
+
+function isIntersectingLines(myLine1, myLine2) {
+    p0x = Number(myLine1.point1.x);
+    p0y = Number(myLine1.point1.y);
+    p1x = Number(myLine1.point2.x);
+    p1y = Number(myLine1.point2.y);
+    p2x = Number(myLine2.point1.x);
+    p2y = Number(myLine2.point1.y);
+    p3x = Number(myLine2.point2.x);
+    p3y = Number(myLine2.point2.y);
+
+
+    s1x = p1x - p0x;
+    s1y = p1y - p0y;
+    s2x = p3x - p2x;
+    s2y = p3y - p2y;
+
+
+    s = (-s1y * (p0x - p2x) + s1x * (p0y - p2y)) / (-s2x * s1y + s1x * s2y);
+    t = (s2x * (p0y - p2y) - s2y * (p0x - p2x)) / (-s2x * s1y + s1x * s2y);
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) return 1;
+
+    return 0; // No collision
 }
 
 setTimeout(renderLayout, 3000);
