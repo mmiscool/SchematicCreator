@@ -27,14 +27,12 @@ This software is not production ready and has almost none of the required functi
     - ignores junctions from list
     - stored as independant data structure and generated on demand.
 - PCB layout tool
-  - data structures in place to hold symbol placement and orientation
-  - No other devemloment has taken place yet.
+  - Placement of pads and roatation
+  - Asigment and checking for net id to overlapping objects 
   
   
 # Todo
 - PCB layout tool
-  - Add placement of pad layouts to grapics area
-  - Add overlapping object detection for pins.
-  - Add asigment and checking for net id to overlapping objects 
-  - Impliment save routine for board layout trace boxes.
-  - EVERY THING !!!!!!!!!!
+  -impliment output of data for pick and place
+  -impliment output of image for creation of boards using a lithographic process
+  
