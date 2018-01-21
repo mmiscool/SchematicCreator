@@ -9,6 +9,8 @@ var UIscale = .5;
 
 var UISelectedLinePoint;
 var UISelectedBoardLayoutNet;
+var UISelectedBoardLayoutLine;
+
 var AplicationModeSetting = "Schematic";
 
 var movePointsTogether = false;
@@ -134,23 +136,40 @@ function Line() {
     this.drawMe = function () {
         UIdrawPin(this.point1);
         UIdrawPin(this.point2);
-        UIdrawLine(this.point1, this.point2,this.collor);
+        UIdrawLine(this.point1, this.point2, this.collor);
 
     };
 
     this.CheckIfClick = function (checkzPoint, NewPointLocationFromDrag) {
         if (DetectIfPointClicked(checkzPoint, this.point1)) {
-            this.point1.x = NewPointLocationFromDrag.x;
-            this.point1.y = NewPointLocationFromDrag.y;
+            if (NewPointLocationFromDrag !== undefined) {
+                this.point1.x = NewPointLocationFromDrag.x;
+                this.point1.y = NewPointLocationFromDrag.y;
+            }
+
 
             return 1;
         }
         if (DetectIfPointClicked(checkzPoint, this.point2)) {
-            this.point2.x = NewPointLocationFromDrag.x;
-            this.point2.y = NewPointLocationFromDrag.y;
+            if (NewPointLocationFromDrag !== undefined) {
+                this.point2.x = NewPointLocationFromDrag.x;
+                this.point2.y = NewPointLocationFromDrag.y;
+            }
+
             return 2;
         }
+
+
     };
+
+
+    this.CheckIfClickJustPoint = function (checkzPoint) {
+        if (DetectIfPointClicked(checkzPoint, this.point1)) return 1;
+        if (DetectIfPointClicked(checkzPoint, this.point2)) return 2;
+
+
+    };
+
 
     this.extend = function (jsonString) {
 
@@ -717,7 +736,13 @@ window.addEventListener("keydown", doKeyDown, true);
 
 function doKeyDown(e) {
     if (AplicationModeSetting === "Board Layout") {
-        UIboardLayoutEngineKeyboardPress(e.keyCode)
+        if (UISelectedBoardLayoutLine !== undefined){
+            BoardLayoutLines.splice(UISelectedBoardLayoutLine, 1);
+            UISelectedBoardLayoutLine = undefined;
+
+            renderLayout();
+        }
+
     }
     //alert( e.keyCode );
     //detect escape key
@@ -773,7 +798,15 @@ document.onwheel = function () {
 var mousePos;
 canvas.addEventListener('mouseup', function (evt) {
     //exit current command on right click
-    if (evt.button === 2) UIsetCurrentToolStatus("");
+    if (evt.button === 2) {
+        UIsetCurrentToolStatus("");
+
+        UIselectedSymbolID = undefined;
+        UIselectedConnectionID = undefined;
+        UISelectedLinePoint = undefined;
+        UISelectedBoardLayoutNet = undefined;
+        UISelectedBoardLayoutLine = undefined;
+    }
     mousePos = getMousePos(canvas, evt);
     console.log(detextifdrag, mousePos);
     UIdragDetect = false;
@@ -786,6 +819,20 @@ canvas.addEventListener('mouseup', function (evt) {
         //UIselectedSymbolID = CheckLayoutSymbolClick(mousePos.x, mousePos.y);
         UIselectedSymbolID = CheckLayoutSymbolClick(detextifdrag.x, detextifdrag.y);
         UIshowSymbolLayoutInfo(UIselectedSymbolID);
+
+
+        BoardLayoutLines.forEach(function (item, index) {
+            bla = item.CheckIfClickJustPoint(mousePos);
+
+            if (bla > 0) {
+                UIsetCurrentToolStatus("");
+                UISelectedBoardLayoutLine = index;
+
+                return false;
+            }
+            //if (bla) alert(index + "  "+bla);
+        });
+
 
         if (detextifdrag.x != mousePos.x || detextifdrag.y != mousePos.y) {
             UIdragDetect = true;
@@ -820,6 +867,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
                         if (bla > 0) {
                             UIsetCurrentToolStatus("");
+                            UISelectedBoardLayoutLine = index;
                             return true;
                         }
                         //if (bla) alert(index + "  "+bla);
@@ -831,6 +879,7 @@ canvas.addEventListener('mouseup', function (evt) {
 
                         if (bla > 0) {
                             UIsetCurrentToolStatus("");
+                            UISelectedBoardLayoutLine = index;
                             return true;
                         }
                         //if (bla) alert(index + "  "+bla);
@@ -839,6 +888,8 @@ canvas.addEventListener('mouseup', function (evt) {
 
 
             }
+
+
 
 
             detextifdrag.x = mousePos.x - detextifdrag.x;
@@ -1244,7 +1295,7 @@ function drawRotatedImage(image, x, y, angle, collor) {
 }
 
 function renderLayout() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, 5000, 5000);
 
 
     if (AplicationModeSetting === "Board Layout") {
@@ -1271,8 +1322,9 @@ function renderLayout() {
         BoardLayoutLines.forEach(function (item, index) {
             if (item.netID === UISelectedBoardLayoutNet) {
                 item.collor = "red"
-            }else
-            {item.collor = "black"}
+            } else {
+                item.collor = "black"
+            }
             item.drawMe();
         });
         BoardLayoutLines = oldBoardLayoutLines;
@@ -1629,7 +1681,7 @@ function UIBoardCheckLayout() {
             if (LineWithWidthIntersectionWithPadDetection(elementA, itemB)) {
                 if (itemB.netID === 0 || itemB.netID === undefined) itemB.netID = elementA.name;
                 if (itemB.netID !== elementA.name) {
-                    alert(itemB.netID + "!==" + elementA.name);
+                    alert("point connection" + itemB.netID + "!==" + elementA.name);
                     result = "failure";
                     return false;
 
@@ -1645,8 +1697,11 @@ function UIBoardCheckLayout() {
         BoardLayoutLines.forEach(function (itemB, indexB) {
             if (LineWithWidthIntersectionDetection(itemA, itemB)) {
                 if (itemB.netID === 0 || itemB.netID === undefined) itemB.netID = itemA.netID;
+                if (itemA.netID === 0 || itemA.netID === undefined) itemA.netID = itemB.netID;
+
+
                 if (itemB.netID !== itemA.netID) {
-                    alert(itemB.netID + "!==" + itemA.netID);
+                    alert("line connection" + itemB.netID + "!==" + itemA.netID);
                     result = "failure";
                     return false;
 
