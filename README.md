@@ -33,6 +33,6 @@ This software is not production ready and has almost none of the required functi
   
 # Todo
 - PCB layout tool
-  -impliment output of data for pick and place
-  -impliment output of image for creation of boards using a lithographic process
+  - impliment output of data for pick and place
+  - impliment output of image for creation of boards using a lithographic process
   
